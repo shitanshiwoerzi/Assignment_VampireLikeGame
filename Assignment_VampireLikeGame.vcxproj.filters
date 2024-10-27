@@ -18,6 +18,9 @@
     <ClInclude Include="src\GamesEngineeringBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\LogicBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -95,6 +98,21 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Resources\23.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\L2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\L.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\grass.jpeg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\hero.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\wizard.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

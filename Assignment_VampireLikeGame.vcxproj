@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\GamesEngineeringBase.h" />
+    <ClInclude Include="src\LogicBase.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
@@ -157,6 +158,11 @@
     <Image Include="Resources\7.png" />
     <Image Include="Resources\8.png" />
     <Image Include="Resources\9.png" />
+    <Image Include="Resources\grass.jpeg" />
+    <Image Include="Resources\hero.png" />
+    <Image Include="Resources\L.png" />
+    <Image Include="Resources\L2.png" />
+    <Image Include="Resources\wizard.png" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\tiles.txt" />
