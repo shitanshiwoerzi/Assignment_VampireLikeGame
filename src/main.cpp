@@ -30,12 +30,14 @@ int main() {
 		if (canvas.keyPressed('D')) x += move;
 
 		s.update(canvas, dt, h);
-		h.update(x, y);
+		h.update(canvas, x, y, dt);
 		cm.update(h.pos.x, h.pos.y);
 
 		// npc与hero的碰撞检测
 		s.checkCollision(canvas, h);
-		h.checkCollision(s);
+
+		// hero发射的projectile碰撞检测
+		h.checkCollision(canvas, s);
 
 		// Draw(); 
 		for (int i = 0; i < canvas.getWidth(); i++)

@@ -35,7 +35,7 @@ namespace LogicBase {
 
 		return false;
 	}
-
+	
 	class Vector2D {
 	public:
 		float x;
@@ -166,7 +166,6 @@ namespace LogicBase {
 		}
 	};
 
-
 	void renderImg(Window& canvas, Image& sprite, Vector2D& pos) {
 		for (unsigned int i = 0; i < sprite.height; i++)
 			if (pos.y + i < canvas.getHeight() && pos.y + i >= 0) {
@@ -179,6 +178,7 @@ namespace LogicBase {
 				}
 			}
 	}
+
 
 	class Character {
 	protected:
@@ -253,6 +253,7 @@ namespace LogicBase {
 		}
 
 		bool collide(Character& h) {
+			if (&h == nullptr) return false;
 			if (this == nullptr) return false;
 			if (checkImageCollision(sprite, pos.x, pos.y, h.sprite, h.pos.x, h.pos.y))
 				return true;
@@ -387,7 +388,7 @@ namespace LogicBase {
 				if (sarray[i] != nullptr) {
 					sarray[i]->update(canvas, h, dt);
 					if (sarray[i]->pos.y > static_cast<int>(canvas.getHeight()))
-						deleteNpc(canvas, i);
+						deleteNpc(canvas, i); // 待修改(npc跑到地图外后删除的条件需完善)
 				}
 			}
 		}
@@ -408,6 +409,7 @@ namespace LogicBase {
 						npc3* npc = dynamic_cast<npc3*>(sarray[i]);
 						for (int j = 0; j < npc->currentSize; j++) {
 							if (npc->parray[j]->collide(h)) {
+								// 待修改 (添加功能：hero受到远程子弹攻击会受伤)
 								cout << "hero was attacked by a projectile" << endl;
 								npc->deleteProjectile(canvas, j);
 							}
@@ -424,21 +426,77 @@ namespace LogicBase {
 	};
 
 	class hero : public Character {
+		float timeElapsed = 0;
+		int currentSize = 0;
 	public:
-		Projectile* weapon;
+		Projectile* parray[maxSiz];
 
 		hero(int _x, int _y, string filename) :Character(_x, _y, filename) {
 			hp = 200.f;
 			speed = 5.f;
 		}
 
-		// hero的攻击碰撞检测
-		void checkCollision(swarm& s) {
-			if (weapon == nullptr) return;
-			for (int i = 0; i < s.currentSize; i++) {
-				if (weapon->collide(*s.sarray[i]))
-					cout << "Attack success" << endl;
+		void update(Window& canvas, float _x, float _y, float dt) {
+			pos.x += _x;
+			pos.y += _y;
+
+			generateProjectile(*this, dt);
+
+			// 子弹移动
+			for (int i = 0; i < currentSize; i++) {
+				if (parray[i] != nullptr) {
+					parray[i]->update();
+					if (parray[i]->pos.y + 2 > static_cast<int>(canvas.getHeight())
+						|| parray[i]->pos.x + 2 > static_cast<int>(canvas.getWidth())
+						|| parray[i]->pos.y - 2 < 0
+						|| parray[i]->pos.x - 2 < 0) {
+						deleteProjectile(canvas, i);
+					}
+				}
 			}
+		}
+
+		// hero的攻击碰撞检测
+		void checkCollision(Window& canvas, swarm& s) {
+			for (int i = 0; i < currentSize; i++) {
+				if (parray[i] != nullptr) {
+					for (int j = 0; j < s.currentSize; j++) {
+						if (parray[i]->collide(*s.sarray[j]))
+							s.deleteNpc(canvas, j);
+					}
+				}
+			}
+		}
+
+		void draw(Window& canvas) override {
+			// draw the npc
+			renderImg(canvas, sprite, pos);
+
+			for (int i = 0; i < currentSize; i++) {
+				if (parray[i] != nullptr)
+					parray[i]->draw(canvas);
+			}
+		}
+
+	private:
+		void generateProjectile(Character& h, float dt) {
+			timeElapsed += dt;
+			Vector2D cp = pos + Vector2D(sprite.width / 2, sprite.height / 2);
+			if (timeElapsed > 1.f) {
+				Projectile* p = new Projectile(cp, Vector2D(500, 0), "Resources/blueProjectile.png");
+				Projectile* p1 = new Projectile(cp, Vector2D(-500, 0), "Resources/blueProjectile.png");
+				parray[currentSize++] = p;
+				parray[currentSize++] = p1;
+				timeElapsed = 0.f;
+			}
+		}
+
+		// 删除子弹
+		void deleteProjectile(Window& canvas, int i) {
+			Projectile* p = parray[i];
+			parray[i] = nullptr;
+			delete p;
+			cout << "Destroyed: " << i << endl;
 		}
 	};
 
