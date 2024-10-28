@@ -509,10 +509,10 @@ namespace LogicBase {
 
 		Camera(int w, int h) : m_Position(Vector2D()), width(w), height(h) {}
 
-		void update(float targetX, float targetY) {
+		void update(float targetX, float targetY, Image& sprite) {
 			// Center the camera on the target (player)
-			m_Position.x = targetX - width / 2;
-			m_Position.y = targetY - height / 2;
+			m_Position.x = targetX + sprite.width - width / 2;
+			m_Position.y = targetY + sprite.width - height / 2;
 		}
 	};
 }

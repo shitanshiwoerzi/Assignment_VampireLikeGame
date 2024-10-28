@@ -31,7 +31,7 @@ int main() {
 
 		s.update(canvas, dt, h);
 		h.update(canvas, x, y, dt);
-		cm.update(h.pos.x, h.pos.y);
+		cm.update(h.pos.x, h.pos.y, h.sprite);
 
 		// npc与hero的碰撞检测
 		s.checkCollision(canvas, h);
@@ -40,9 +40,15 @@ int main() {
 		h.checkCollision(canvas, s);
 
 		// Draw(); 
-		for (int i = 0; i < canvas.getWidth(); i++)
-			for (int j = 0; j < canvas.getHeight(); j++)
-				canvas.draw(i, j, background.at(i, j));
+		for (int i = 0; i < canvas.getWidth(); i++) {
+			if (i - cm.m_Position.x >= 0 && i - cm.m_Position.x < canvas.getWidth()) {
+				for (int j = 0; j < canvas.getHeight(); j++) {
+					if (j - cm.m_Position.y >= 0 && j - cm.m_Position.y < canvas.getHeight())
+						canvas.draw(i - cm.m_Position.x, j - cm.m_Position.y, background.at(i, j));
+				}
+			}
+
+		}
 
 		s.draw(canvas);
 		h.draw(canvas);
