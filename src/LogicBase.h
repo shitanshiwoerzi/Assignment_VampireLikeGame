@@ -171,6 +171,40 @@ namespace LogicBase {
 		}
 	};
 
+	class Health {
+		float maxHp;
+		float currentHp;
+	public:
+		Health() {}
+
+		Health(float _max) {
+			maxHp = _max;
+			currentHp = maxHp;
+		}
+
+		void takeDamage(float damage) {
+			currentHp -= damage;
+			if (currentHp < 0) currentHp = 0;
+		}
+
+		void heal(float amount) {
+			currentHp += amount;
+			if (currentHp > maxHp) currentHp = maxHp;
+		}
+
+		bool isDead() const {
+			return currentHp <= 0;
+		}
+
+		float getHp() const {
+			return currentHp;
+		}
+
+		float getMaxHp() const {
+			return maxHp;
+		}
+	};
+
 	class Camera {
 	public:
 		Vector2D m_Position;
@@ -246,7 +280,7 @@ namespace LogicBase {
 
 	class Character {
 	protected:
-		float hp;
+		Health* hp;
 		float speed;
 
 	public:
@@ -254,7 +288,6 @@ namespace LogicBase {
 		Image sprite;
 
 		Character(int _x, int _y, string filename) {
-			hp = 0.f;
 			speed = 0.f;
 			sprite.load(filename);
 			pos.x = _x;
@@ -293,6 +326,10 @@ namespace LogicBase {
 				return true;
 			return false;
 		}
+
+		Health& getHp() {
+			return *hp;
+		}
 	};
 
 	class Projectile {
@@ -328,7 +365,7 @@ namespace LogicBase {
 	class npc1 : public Character {
 	public:
 		npc1(int _x, int _y, string filename) :Character(_x, _y, filename) {
-			hp = 100.f;
+			hp = new Health(100.f);
 			speed = 10.f;
 		}
 	};
@@ -336,7 +373,7 @@ namespace LogicBase {
 	class npc2 : public Character {
 	public:
 		npc2(int _x, int _y, string filename) :Character(_x, _y, filename) {
-			hp = 200.f;
+			hp = new Health(200.f);
 			speed = 5.f;
 		}
 	};
@@ -352,7 +389,7 @@ namespace LogicBase {
 		Projectile* parray[maxSiz];
 
 		npc3(int _x, int _y, string filename) :Character(_x, _y, filename) {
-			hp = 50.f;
+			hp = new Health(50.f);
 			speed = 0.f;
 		}
 
@@ -506,7 +543,7 @@ namespace LogicBase {
 		Projectile* parray[maxSiz];
 
 		hero(int _x, int _y, string filename) :Character(_x, _y, filename) {
-			hp = 200.f;
+			hp = new Health(200.f);
 			speed = 5.f;
 		}
 
@@ -563,8 +600,9 @@ namespace LogicBase {
 					for (int j = 0; j < s.currentSize; j++) {
 						if (parray[i]->collide(*s.sarray[j])) {
 							deleteProjectile(i);
-							// 如果npc生命值见底
-							s.deleteNpc(canvas, j);
+							s.sarray[j]->getHp().takeDamage(50.f);
+							if (s.sarray[j]->getHp().isDead())
+								s.deleteNpc(canvas, j);
 						}
 
 					}
