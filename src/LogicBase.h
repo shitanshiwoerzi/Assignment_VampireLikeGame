@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <corecrt_math_defines.h>
+#include "global.h"
 
 using namespace GamesEngineeringBase;
 using namespace std;
@@ -327,7 +328,7 @@ namespace LogicBase {
 			return false;
 		}
 
-		Health& getHp() {
+		Health& getHealth() {
 			return *hp;
 		}
 	};
@@ -440,6 +441,14 @@ namespace LogicBase {
 		}
 	};
 
+	class npc4 : public Character {
+	public:
+		npc4(int _x, int _y, string filename) :Character(_x, _y, filename) {
+			hp = new Health(150.f);
+			speed = 15.f;
+		}
+	};
+
 	class swarm {
 		float timeElapsed = 0.f;
 		float timeThreshold = 3.f;
@@ -465,6 +474,7 @@ namespace LogicBase {
 
 				if (npcType == 0) p = new npc1(x, y, "Resources/shoom.png");
 				else if (npcType == 1) p = new npc2(x, y, "Resources/gab.png");
+				else if (npcType == 2) p = new npc4(x, y, "Resources/skeleton.png");
 				else p = new npc3(rand() % canvas.getWidth(), rand() % canvas.getHeight(), "Resources/wizard.png");
 
 				if (p == nullptr) {
@@ -489,9 +499,8 @@ namespace LogicBase {
 
 		// npc逻辑更新
 		void npcUpdate(Window& canvas, float dt, Character& h) {
-			int npcType = rand() % 3;
+			int npcType = rand() % 4;
 			generateNpc(canvas, dt, npcType);
-			int move = static_cast<int>(500.f * dt);
 			for (int i = 0; i < currentSize; i++) {
 				if (sarray[i] != nullptr) {
 					sarray[i]->update(canvas, h, dt);
@@ -499,7 +508,7 @@ namespace LogicBase {
 					//	deleteNpc(canvas, i); // 待修改(npc跑到地图外后删除的条件需完善)
 				}
 			}
-			checkCollision(canvas, h);
+			checkCollision(canvas, h, dt);
 		}
 
 		// 绘制在canvas上
@@ -512,23 +521,40 @@ namespace LogicBase {
 
 	private:
 		// 生成的npc与hero的碰撞检测, 即npc的攻击碰撞检测(无projectile)
-		void checkCollision(Window& canvas, Character& h) {
+		void checkCollision(Window& canvas, Character& h, float dt) {
 			for (int i = 0; i < currentSize; i++) {
 				if (sarray[i] != nullptr) {
 					if (dynamic_cast<npc3*>(sarray[i])) {
 						npc3* npc = dynamic_cast<npc3*>(sarray[i]);
 						for (int j = 0; j < npc->currentSize; j++) {
 							if (npc->parray[j]->collide(h)) {
-								// 待修改 (添加功能：hero受到远程子弹攻击会受伤)
-								cout << "hero was attacked by a projectile" << endl;
+								h.getHealth().takeDamage(20);
+								cout << "hero was attacked";
+								cout << ", current hp is " << h.getHealth().getHp();
+								cout << endl;
+								if (h.getHealth().isDead()) {
+									cout << "game over" << endl;
+									running = false;
+								}
 								npc->deleteProjectile(j);
 							}
 						}
 					}
 					if (sarray[i]->collide(h)) {
-						// (待添加功能) 如果碰到npc, hero掉血
-						cout << "npc touched the hero " << i << endl;
-						//deleteNpc(canvas, i);
+						timeElapsed += dt;
+						if (timeElapsed > 1.f) {
+							// 定时检测碰撞, 防止过多的碰撞判定
+							h.getHealth().takeDamage(20);
+							cout << "npc touched the hero " << i << endl;
+							cout << "hero was attacked";
+							cout << ", current hp is " << h.getHealth().getHp();
+							cout << endl;
+							timeElapsed = 0.f;
+						}
+						if (h.getHealth().isDead()) {
+							cout << "game over" << endl;
+							running = false;
+						}
 					}
 				}
 			}
@@ -600,8 +626,8 @@ namespace LogicBase {
 					for (int j = 0; j < s.currentSize; j++) {
 						if (parray[i]->collide(*s.sarray[j])) {
 							deleteProjectile(i);
-							s.sarray[j]->getHp().takeDamage(50.f);
-							if (s.sarray[j]->getHp().isDead())
+							s.sarray[j]->getHealth().takeDamage(50.f);
+							if (s.sarray[j]->getHealth().isDead())
 								s.deleteNpc(canvas, j);
 						}
 

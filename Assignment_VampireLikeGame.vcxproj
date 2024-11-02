@@ -128,9 +128,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\GamesEngineeringBase.h" />
+    <ClInclude Include="src\global.h" />
     <ClInclude Include="src\LogicBase.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\global.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
