@@ -29,15 +29,15 @@ int main() {
 		if (canvas.keyPressed('A')) x -= move;
 		if (canvas.keyPressed('D')) x += move;
 
-		s.update(canvas, dt, h);
-		h.update(canvas, x, y, dt);
+		s.npcUpdate(canvas, dt, h);
+		h.heroUpdate(canvas, x, y, dt, s);
 		cm.update(h.pos.x, h.pos.y, h.sprite);
 
-		// npc与hero的碰撞检测
-		s.checkCollision(canvas, h);
+		//// npc与hero的碰撞检测
+		//s.checkCollision(canvas, h);
 
-		// hero发射的projectile碰撞检测
-		h.checkCollision(canvas, s);
+		//// hero发射的projectile碰撞检测
+		//h.checkCollision(canvas, s);
 
 		// Draw(); 
 		for (int i = 0; i < canvas.getWidth(); i++) {
@@ -47,11 +47,10 @@ int main() {
 						canvas.draw(i - cm.m_Position.x, j - cm.m_Position.y, background.at(i, j));
 				}
 			}
-
 		}
 
-		s.draw(canvas);
-		h.draw(canvas);
+		s.draw(canvas,cm);
+		h.draw(canvas,cm);
 
 		canvas.present();
 	}

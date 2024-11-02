@@ -164,6 +164,7 @@
     <Image Include="Resources\L.png" />
     <Image Include="Resources\L2.png" />
     <Image Include="Resources\projectile.png" />
+    <Image Include="Resources\shoom.png" />
     <Image Include="Resources\wizard.png" />
   </ItemGroup>
   <ItemGroup>

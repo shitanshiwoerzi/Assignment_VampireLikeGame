@@ -121,6 +121,9 @@
     <Image Include="Resources\projectile.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Resources\shoom.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\tiles.txt" />
