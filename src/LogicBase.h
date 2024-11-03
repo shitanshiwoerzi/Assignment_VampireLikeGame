@@ -278,7 +278,6 @@ namespace LogicBase {
 		}
 	}
 
-
 	class Character {
 	protected:
 		Health* hp;
@@ -334,10 +333,11 @@ namespace LogicBase {
 	};
 
 	class Projectile {
+		Vector2D vel;
 	public:
 		Image sprite;
 		Vector2D pos;
-		Vector2D vel;
+		float speed = 1.f;
 
 		Projectile(Vector2D _pos, Vector2D _vel, string filename) {
 			pos = _pos;
@@ -346,8 +346,9 @@ namespace LogicBase {
 		}
 
 		void update(int arg) {
-			pos.x += vel.x / arg;
-			pos.y += vel.y / arg;
+			speed = arg;
+			pos.x += vel.x * (speed / 300);
+			pos.y += vel.y * (speed / 300);
 		}
 
 		void draw(Window& canvas, Camera& cm) {
@@ -408,7 +409,6 @@ namespace LogicBase {
 			Projectile* p = parray[i];
 			parray[i] = nullptr;
 			delete p;
-			cout << "Destroyed: " << i << endl;
 		}
 
 		void update(Window& canvas, Character& h, float dt) override {
@@ -418,7 +418,7 @@ namespace LogicBase {
 			// 子弹移动
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr) {
-					parray[i]->update(300);
+					parray[i]->update(1.f);
 					if (parray[i]->pos.y + 2 > static_cast<int>(canvas.getHeight())
 						|| parray[i]->pos.x + 2 > static_cast<int>(canvas.getWidth())
 						|| parray[i]->pos.y - 2 < 0
@@ -449,6 +449,31 @@ namespace LogicBase {
 		}
 	};
 
+	class powerUp {
+		Vector2D pos;
+		Image sprite;
+	public:
+		powerUp() {}
+
+		powerUp(int x, int y) {
+			pos.x = x;
+			pos.y = y;
+			sprite.load("Resources/Item_Powerup.png");
+		}
+
+		bool collide(Character& h) {
+			if (&h == nullptr) return false;
+			if (this == nullptr) return false;
+			if (checkImageCollision(sprite, pos.x, pos.y, h.sprite, h.pos.x, h.pos.y))
+				return true;
+			return false;
+		}
+
+		void draw(Window& canvas, Camera& cm) {
+			renderImg(canvas, sprite, pos, cm);
+		}
+	};
+
 	class swarm {
 		float timeElapsed = 0.f;
 		float timeThreshold = 3.f;
@@ -456,8 +481,40 @@ namespace LogicBase {
 	public:
 		int currentSize = 0;
 		Character* sarray[maxSiz];
+
 		swarm() {}
 
+		// 删除Npc
+		void deleteNpc(Window& canvas, int i) {
+			Character* p = sarray[i];
+			sarray[i] = nullptr;
+			delete p;
+		}
+
+		// npc逻辑更新
+		void swarmUpdate(Window& canvas, float dt, Character& h) {
+			int npcType = rand() % 4;
+			generateNpc(canvas, dt, npcType);
+			for (int i = 0; i < currentSize; i++) {
+				if (sarray[i] != nullptr) {
+					sarray[i]->update(canvas, h, dt);
+					// 待修改(npc跑到地图外后删除的条件需完善)
+				}
+			}
+			checkCollision(canvas, h, dt);
+		}
+
+		// 绘制在canvas上
+		void draw(Window& canvas, Camera& cm) {
+			for (int i = 0; i < currentSize; i++) {
+				if (sarray[i] != nullptr)
+					sarray[i]->draw(canvas, cm);
+			}
+
+
+		}
+
+	private:
 		// 定时生成npc
 		void generateNpc(Window& canvas, float dt, int npcType) {
 			timeElapsed += dt;
@@ -489,37 +546,6 @@ namespace LogicBase {
 			}
 		}
 
-		// 删除Npc
-		void deleteNpc(Window& canvas, int i) {
-			Character* p = sarray[i];
-			sarray[i] = nullptr;
-			delete p;
-			cout << "Destroyed: " << i << endl;
-		}
-
-		// npc逻辑更新
-		void npcUpdate(Window& canvas, float dt, Character& h) {
-			int npcType = rand() % 4;
-			generateNpc(canvas, dt, npcType);
-			for (int i = 0; i < currentSize; i++) {
-				if (sarray[i] != nullptr) {
-					sarray[i]->update(canvas, h, dt);
-					//if (sarray[i]->pos.y > static_cast<int>(canvas.getHeight()))
-					//	deleteNpc(canvas, i); // 待修改(npc跑到地图外后删除的条件需完善)
-				}
-			}
-			checkCollision(canvas, h, dt);
-		}
-
-		// 绘制在canvas上
-		void draw(Window& canvas, Camera& cm) {
-			for (int i = 0; i < currentSize; i++) {
-				if (sarray[i] != nullptr)
-					sarray[i]->draw(canvas, cm);
-			}
-		}
-
-	private:
 		// 生成的npc与hero的碰撞检测, 即npc的攻击碰撞检测(无projectile)
 		void checkCollision(Window& canvas, Character& h, float dt) {
 			for (int i = 0; i < currentSize; i++) {
@@ -563,9 +589,11 @@ namespace LogicBase {
 
 	class hero : public Character {
 		float timeElapsed = 0;
-		int currentSize = 0;
+		float aoeTimeElapsed = 0;
 		float projectileInterval = 1.f;
+		float aoeCooldownDuration = 10.0f;
 	public:
+		int currentSize = 0;
 		Projectile* parray[maxSiz];
 
 		hero(int _x, int _y, string filename) :Character(_x, _y, filename) {
@@ -576,12 +604,12 @@ namespace LogicBase {
 		void heroUpdate(Window& canvas, float _x, float _y, float dt, swarm& s) {
 			update(canvas, _x, _y);
 			generateProjectile(*this, dt, s);
-			checkCollision(canvas, s);
+			checkCollision(canvas, s, dt);
 
-			// 子弹移动
+			// 子弹移动(delete逻辑待修改)
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr) {
-					parray[i]->update(100);
+					parray[i]->update(heroProjectileSpeed);
 					if (parray[i]->pos.y + 2 > static_cast<int>(canvas.getHeight())
 						|| parray[i]->pos.x + 2 > static_cast<int>(canvas.getWidth())
 						|| parray[i]->pos.y - 2 < 0
@@ -620,7 +648,8 @@ namespace LogicBase {
 		}
 
 		// hero的攻击碰撞检测
-		void checkCollision(Window& canvas, swarm& s) {
+		void checkCollision(Window& canvas, swarm& s, float dt) {
+			// linear attack 
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr) {
 					for (int j = 0; j < s.currentSize; j++) {
@@ -634,6 +663,26 @@ namespace LogicBase {
 					}
 				}
 			}
+
+			// aoe attack, aoeTriggered的作用是让技能仅触发一次
+			aoeTimeElapsed += dt;
+			if (canvas.keyPressed('J') && aoeTimeElapsed >= aoeCooldownDuration) {
+				if (!aoeTriggered) {
+					cout << "Use Aoe skill" << endl;
+					triggerAOE(canvas, s, aoeNumber); // the number should not be fixed
+					aoeTriggered = true;
+					aoeTimeElapsed = 0;
+				}
+			}
+			else if (canvas.keyPressed('J') && aoeTimeElapsed < aoeCooldownDuration) {
+				if (!aoeTriggered) {
+					float cd = aoeCooldownDuration - aoeTimeElapsed;
+					cout << "Aoe cooldown left: " << cd << endl;
+					aoeTriggered = true;
+				}
+			}
+			else
+				aoeTriggered = false;
 		}
 
 		void generateProjectile(Character& h, float dt, swarm& s) {
@@ -652,12 +701,89 @@ namespace LogicBase {
 			}
 		}
 
+		// 选择生命值最高的前N个NPC并对其进行攻击
+		void triggerAOE(Window& canvas, swarm& s, int N) {
+			for (int n = 0; n < N; n++) {
+				int maxIndex = -1;
+				float maxHealth = -100.f;
+				// 找到当前最大生命值的NPC
+				for (int i = 0; i < s.currentSize; i++) {
+					if (s.sarray[i] != nullptr) {
+						float hp = s.sarray[i]->getHealth().getHp();
+						if (hp > maxHealth) {
+							maxHealth = hp;
+							maxIndex = i;
+						}
+					}
+				}
+
+				if (maxIndex != -1) {
+					Character* npc = s.sarray[maxIndex];
+					// 对该NPC进行攻击
+					cout << "Attacking NPC" << typeid(*s.sarray[maxIndex]).name()
+						<< "with health : " << npc->getHealth().getHp() << endl;
+					// to-do 实现aoe的视觉效果
+
+					// 假设攻击减少50点生命值
+					npc->getHealth().takeDamage(200);
+					if (npc->getHealth().isDead())
+						s.deleteNpc(canvas, maxIndex);
+				}
+			}
+		}
+
 		// 删除子弹
 		void deleteProjectile(int i) {
 			Projectile* p = parray[i];
 			parray[i] = nullptr;
 			delete p;
-			cout << "Destroyed: " << i << endl;
+		}
+	};
+
+	class items {
+		float timeElapsed = 0.f;
+		float timeThreshold = 10.f;
+
+	public:
+		int currentSize = 0;
+		powerUp* upItems[maxSiz];
+
+		items() {}
+
+		void update(Window& canvas, float dt, hero& h){
+			generateItem(canvas, dt);
+			for (int i = 0; i < currentSize; i++) {
+				// 碰撞到增强道具并获得增强效果
+				if (upItems[i]->collide(h)) {
+					heroProjectileSpeed += 1.f;
+					aoeNumber += 1;
+					deleteItem(i);
+				}
+			}
+		}
+
+		void draw(Window& canvas, Camera& cm) {
+			for (int i = 0; i < currentSize; i++) {
+				if (upItems[i] != nullptr)
+					upItems[i]->draw(canvas, cm);
+			}
+		}
+
+	private:
+		void generateItem(Window& canvas, float dt) {
+			timeElapsed += dt;
+			if (timeElapsed > timeThreshold) {
+				powerUp* p = new powerUp(rand() % canvas.getWidth(), rand() % canvas.getHeight());
+				if (p == nullptr) return;
+				upItems[currentSize++] = p;
+				timeElapsed = 0.f;
+			}
+		}
+
+		void deleteItem(int i) {
+			powerUp* p = upItems[i];
+			upItems[i] = nullptr;
+			delete p;
 		}
 	};
 }

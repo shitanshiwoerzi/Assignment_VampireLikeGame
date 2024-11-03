@@ -12,6 +12,7 @@ int main() {
 	Timer tim;
 	hero h = hero(canvas.getWidth() / 2, canvas.getHeight() / 2, "Resources/hero.png");
 	swarm s;
+	items itm;
 	Camera cm = Camera(canvas.getWidth(), canvas.getHeight());
 	int start_x = 0;
 	int start_y = 0;
@@ -29,8 +30,9 @@ int main() {
 		if (canvas.keyPressed('A')) x -= move;
 		if (canvas.keyPressed('D')) x += move;
 
-		s.npcUpdate(canvas, dt, h);
+		s.swarmUpdate(canvas, dt, h);
 		h.heroUpdate(canvas, x, y, dt, s);
+		itm.update(canvas, dt, h);
 		cm.update(h.pos.x, h.pos.y, h.sprite);
 
 		// Draw(); 
@@ -43,6 +45,7 @@ int main() {
 			}
 		}
 
+		itm.draw(canvas, cm);
 		s.draw(canvas, cm);
 		h.draw(canvas, cm);
 
