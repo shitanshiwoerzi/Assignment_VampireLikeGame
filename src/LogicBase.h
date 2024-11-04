@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "GamesEngineeringBase.h"
 #include <iostream>
+#include <fstream>
+#include<string>
 #include <cmath>
 #include <corecrt_math_defines.h>
 #include "global.h"
@@ -9,33 +11,7 @@ using namespace GamesEngineeringBase;
 using namespace std;
 
 namespace LogicBase {
-	const int maxSiz = 1000;
-
-	// 图片像素级碰撞检测
-	bool checkImageCollision(Image& img1, unsigned int x1, unsigned int y1, Image& img2, unsigned int x2, unsigned int y2)
-	{
-		// 计算图片的重叠区域
-		unsigned int x_overlap_start = max(x1, x2);
-		unsigned int y_overlap_start = max(y1, y2);
-		unsigned int x_overlap_end = min(x1 + img1.width, x2 + img2.width);
-		unsigned int y_overlap_end = min(y1 + img1.height, y2 + img2.height);
-
-		// 如果没有重叠, 返回false
-		if (x_overlap_start >= x_overlap_end || y_overlap_start >= y_overlap_end) return false;
-
-		// Check each pixel in the overlapping area
-		for (unsigned int y = y_overlap_start; y < y_overlap_end; ++y)
-		{
-			for (unsigned int x = x_overlap_start; x < x_overlap_end; ++x)
-			{
-				//Get the relative positions in each image, check if both pixels are non-transparent
-				if (img1.alphaAt(x - x1, y - y1) > 0 && img2.alphaAt(x - x2, y - y2) > 0)
-					return true;
-			}
-		}
-
-		return false;
-	}
+	const int maxSiz = 10000;
 
 	class Vector2D {
 	public:
@@ -69,6 +45,16 @@ namespace LogicBase {
 			res.x = x - vec.x;
 			res.y = y - vec.y;
 			return res;
+		}
+
+		void save(ofstream& binout) {
+			binout.write((char*)&x, sizeof(x));
+			binout.write((char*)&y, sizeof(y));
+		}
+
+		void load(ifstream& infile) {
+			infile.read((char*)&x, sizeof(x));
+			infile.read((char*)&y, sizeof(x));
 		}
 	};
 
@@ -204,6 +190,16 @@ namespace LogicBase {
 		float getMaxHp() const {
 			return maxHp;
 		}
+
+		void save(ofstream& binout) {
+			binout.write((char*)&maxHp, sizeof(maxHp));
+			binout.write((char*)&currentHp, sizeof(currentHp));
+		}
+
+		void load(ifstream& infile) {
+			infile.read((char*)&maxHp, sizeof(maxHp));
+			infile.read((char*)&currentHp, sizeof(currentHp));
+		}
 	};
 
 	class Camera {
@@ -282,16 +278,19 @@ namespace LogicBase {
 	protected:
 		Health* hp;
 		float speed;
+		string filename;
 
 	public:
 		Vector2D pos;
 		Image sprite;
 
-		Character(int _x, int _y, string filename) {
+		Character(int _x, int _y, string _filename) {
+			hp = new Health(100.f);
 			speed = 0.f;
-			sprite.load(filename);
 			pos.x = _x;
 			pos.y = _y;
+			filename = _filename;
+			sprite.load(filename);
 		}
 
 		void update(float _x, float _y) {
@@ -330,6 +329,22 @@ namespace LogicBase {
 		Health& getHealth() {
 			return *hp;
 		}
+
+		string getFilename() {
+			return filename;
+		}
+
+		virtual void save(ofstream& binout) {
+			hp->save(binout);
+			pos.save(binout);
+			binout.write((char*)&speed, sizeof(speed));
+		}
+
+		virtual void load(ifstream& infile) {
+			hp->load(infile);
+			pos.load(infile);
+			infile.read((char*)&speed, sizeof(speed));
+		}
 	};
 
 	class Projectile {
@@ -338,6 +353,9 @@ namespace LogicBase {
 		Image sprite;
 		Vector2D pos;
 		float speed = 1.f;
+
+
+		Projectile(string filename) { sprite.load(filename); }
 
 		Projectile(Vector2D _pos, Vector2D _vel, string filename) {
 			pos = _pos;
@@ -362,11 +380,24 @@ namespace LogicBase {
 				return true;
 			return false;
 		}
+
+		void save(ofstream& binout) {
+			vel.save(binout);
+			pos.save(binout);
+			binout.write((char*)&speed, sizeof(speed));
+		}
+
+		void load(ifstream& infile) {
+			vel.load(infile);
+			pos.load(infile);
+			infile.read((char*)&speed, sizeof(speed));
+		}
 	};
 
 	class npc1 : public Character {
 	public:
-		npc1(int _x, int _y, string filename) :Character(_x, _y, filename) {
+		npc1(int _x, int _y, string _filename) :Character(_x, _y, _filename) {
+			delete hp;
 			hp = new Health(100.f);
 			speed = 10.f;
 		}
@@ -374,7 +405,8 @@ namespace LogicBase {
 
 	class npc2 : public Character {
 	public:
-		npc2(int _x, int _y, string filename) :Character(_x, _y, filename) {
+		npc2(int _x, int _y, string _filename) :Character(_x, _y, _filename) {
+			delete hp;
 			hp = new Health(200.f);
 			speed = 5.f;
 		}
@@ -390,7 +422,8 @@ namespace LogicBase {
 		int currentSize = 0;
 		Projectile* parray[maxSiz];
 
-		npc3(int _x, int _y, string filename) :Character(_x, _y, filename) {
+		npc3(int _x, int _y, string _filename) :Character(_x, _y, _filename) {
+			delete hp;
 			hp = new Health(50.f);
 			speed = 0.f;
 		}
@@ -439,11 +472,47 @@ namespace LogicBase {
 					parray[i]->draw(canvas, cm);
 			}
 		}
+
+		void save(ofstream& binout) override {
+			Character::save(binout);
+			binout.write((char*)&timeElapsed, sizeof(timeElapsed));
+			binout.write((char*)&currentSize, sizeof(currentSize));
+			for (int i = 0; i < currentSize; i++) {
+				bool exists = (parray[i] != nullptr);
+				binout.write((char*)&exists, sizeof(exists));
+				if (exists) {
+					parray[i]->save(binout);
+				}
+			}
+		}
+
+		void load(ifstream& infile) override {
+			Character::load(infile);
+			infile.read((char*)&timeElapsed, sizeof(timeElapsed));
+			infile.read((char*)&currentSize, sizeof(currentSize));
+			for (int i = 0; i < currentSize; i++) {
+				bool exists;
+				infile.read((char*)&exists, sizeof(exists));
+				if (exists) {
+					if (parray[i] == nullptr) {
+						parray[i] = new Projectile("Resources/npcProjectile.png");
+					}
+					parray[i]->load(infile);
+				}
+				else {
+					if (parray[i] != nullptr) {
+						delete parray[i];
+						parray[i] = nullptr;
+					}
+				}
+			}
+		}
 	};
 
 	class npc4 : public Character {
 	public:
-		npc4(int _x, int _y, string filename) :Character(_x, _y, filename) {
+		npc4(int _x, int _y, string _filename) :Character(_x, _y, _filename) {
+			delete hp;
 			hp = new Health(150.f);
 			speed = 15.f;
 		}
@@ -453,12 +522,12 @@ namespace LogicBase {
 		Vector2D pos;
 		Image sprite;
 	public:
-		powerUp() {}
+		//powerUp() {}
 
 		powerUp(int x, int y) {
 			pos.x = x;
 			pos.y = y;
-			sprite.load("Resources/Item_Powerup.png");
+			sprite.load("Resources/item_Powerup.png");
 		}
 
 		bool collide(Character& h) {
@@ -472,6 +541,14 @@ namespace LogicBase {
 		void draw(Window& canvas, Camera& cm) {
 			renderImg(canvas, sprite, pos, cm);
 		}
+
+		void save(ofstream& binout) {
+			pos.save(binout);
+		}
+
+		void load(ifstream& infile) {
+			pos.load(infile);
+		}
 	};
 
 	class swarm {
@@ -482,7 +559,11 @@ namespace LogicBase {
 		int currentSize = 0;
 		Character* sarray[maxSiz];
 
-		swarm() {}
+		swarm() {
+			for (int i = 0; i < maxSiz; ++i) {
+				sarray[i] = nullptr;
+			}
+		}
 
 		// 删除Npc
 		void deleteNpc(Window& canvas, int i) {
@@ -510,8 +591,42 @@ namespace LogicBase {
 				if (sarray[i] != nullptr)
 					sarray[i]->draw(canvas, cm);
 			}
+		}
 
+		void save(ofstream& binout) {
+			binout.write((char*)&timeElapsed, sizeof(timeElapsed));
+			binout.write((char*)&currentSize, sizeof(currentSize));
+			for (int i = 0; i < currentSize; i++) {
+				bool exists = (sarray[i] != nullptr);
+				binout.write((char*)&exists, sizeof(exists));
+				if (exists) {
+					saveString(binout, sarray[i]->getFilename());
+					sarray[i]->save(binout);
+				}
+			}
+		}
 
+		void load(ifstream& infile) {
+			infile.read((char*)&timeElapsed, sizeof(timeElapsed));
+			infile.read((char*)&currentSize, sizeof(currentSize));
+			for (int i = 0; i < currentSize; i++) {
+				bool exists;
+				infile.read((char*)&exists, sizeof(exists));
+				if (exists) {
+					if (sarray[i] == nullptr) {
+						string filename = loadString(infile); // 读取文件路径
+						sarray[i] = new Character(0, 0, filename); // 使用文件路径创建对象
+					}
+
+					sarray[i]->load(infile);
+				}
+				else {
+					if (sarray[i] != nullptr) {
+						delete sarray[i];
+						sarray[i] = nullptr;
+					}
+				}
+			}
 		}
 
 	private:
@@ -597,6 +712,7 @@ namespace LogicBase {
 		Projectile* parray[maxSiz];
 
 		hero(int _x, int _y, string filename) :Character(_x, _y, filename) {
+			delete hp;
 			hp = new Health(200.f);
 			speed = 5.f;
 		}
@@ -627,6 +743,50 @@ namespace LogicBase {
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr)
 					parray[i]->draw(canvas, cm);
+			}
+		}
+
+		void save(ofstream& binout) {
+			binout.write((char*)&timeElapsed, sizeof(timeElapsed));
+			binout.write((char*)&aoeTimeElapsed, sizeof(aoeTimeElapsed));
+			binout.write((char*)&currentSize, sizeof(currentSize));
+			binout.write((char*)&speed, sizeof(speed));
+			pos.save(binout);
+			hp->save(binout);
+
+			// ensure whether the parray[i] exists and save the bool variable
+			for (int i = 0; i < currentSize; i++) {
+				bool exists = (parray[i] != nullptr);
+				binout.write((char*)&exists, sizeof(exists));
+				if (exists) {
+					parray[i]->save(binout);
+				}
+			}
+		}
+
+		void load(ifstream& infile) {
+			infile.read((char*)&timeElapsed, sizeof(timeElapsed));
+			infile.read((char*)&aoeTimeElapsed, sizeof(aoeTimeElapsed));
+			infile.read((char*)&currentSize, sizeof(currentSize));
+			infile.read((char*)&speed, sizeof(speed));
+			pos.load(infile);
+			hp->load(infile);
+
+			for (int i = 0; i < currentSize; i++) {
+				bool exists;
+				infile.read((char*)&exists, sizeof(exists));
+				if (exists) {
+					if (parray[i] == nullptr) {
+						parray[i] = new Projectile("Resources/blueProjectile.png");
+					}
+					parray[i]->load(infile);
+				}
+				else {
+					if (parray[i] != nullptr) {
+						delete parray[i];
+						parray[i] = nullptr;
+					}
+				}
 			}
 		}
 
@@ -748,9 +908,13 @@ namespace LogicBase {
 		int currentSize = 0;
 		powerUp* upItems[maxSiz];
 
-		items() {}
+		items() {
+			for (int i = 0; i < maxSiz; ++i) {
+				upItems[i] = nullptr;
+			}
+		}
 
-		void update(Window& canvas, float dt, hero& h){
+		void update(Window& canvas, float dt, hero& h) {
 			generateItem(canvas, dt);
 			for (int i = 0; i < currentSize; i++) {
 				// 碰撞到增强道具并获得增强效果
@@ -766,6 +930,39 @@ namespace LogicBase {
 			for (int i = 0; i < currentSize; i++) {
 				if (upItems[i] != nullptr)
 					upItems[i]->draw(canvas, cm);
+			}
+		}
+
+		void save(ofstream& binout) {
+			binout.write((char*)&timeElapsed, sizeof(timeElapsed));
+			binout.write((char*)&currentSize, sizeof(currentSize));
+			for (int i = 0; i < currentSize; i++) {
+				bool exists = (upItems[i] != nullptr);
+				binout.write((char*)&exists, sizeof(exists));
+				if (exists) {
+					upItems[i]->save(binout);
+				}
+			}
+		}
+
+		void load(ifstream& infile) {
+			infile.read((char*)&timeElapsed, sizeof(timeElapsed));
+			infile.read((char*)&currentSize, sizeof(currentSize));
+			for (int i = 0; i < currentSize; i++) {
+				bool exists;
+				infile.read((char*)&exists, sizeof(exists));
+				if (exists) {
+					if (upItems[i] == nullptr) {
+						upItems[i] = new powerUp(0,0);
+					}
+					upItems[i]->load(infile);
+				}
+				else {
+					if (upItems[i] != nullptr) {
+						delete upItems[i];
+						upItems[i] = nullptr;
+					}
+				}
 			}
 		}
 

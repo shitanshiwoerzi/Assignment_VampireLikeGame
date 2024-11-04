@@ -130,6 +130,7 @@
     <ClInclude Include="src\GamesEngineeringBase.h" />
     <ClInclude Include="src\global.h" />
     <ClInclude Include="src\LogicBase.h" />
+    <ClInclude Include="src\SavedGameHandling.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\global.cpp" />
@@ -161,16 +162,22 @@
     <Image Include="Resources\8.png" />
     <Image Include="Resources\9.png" />
     <Image Include="Resources\blueProjectile.png" />
+    <Image Include="Resources\gab.png" />
     <Image Include="Resources\grass.jpeg" />
     <Image Include="Resources\hero.png" />
+    <Image Include="Resources\Item_Powerup.png" />
     <Image Include="Resources\L.png" />
     <Image Include="Resources\L2.png" />
-    <Image Include="Resources\projectile.png" />
+    <Image Include="Resources\npcProjectile.png" />
     <Image Include="Resources\shoom.png" />
+    <Image Include="Resources\skeleton.png" />
     <Image Include="Resources\wizard.png" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\tiles.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SavedData\test.dat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

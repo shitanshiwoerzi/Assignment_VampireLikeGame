@@ -1,6 +1,9 @@
 ﻿#include "GamesEngineeringBase.h"
 #include "LogicBase.h"
 #include "global.h"
+#include <string>
+#include "SavedGameHandling.h"
+
 using namespace GamesEngineeringBase;
 using namespace LogicBase;
 
@@ -14,15 +17,16 @@ int main() {
 	swarm s;
 	items itm;
 	Camera cm = Camera(canvas.getWidth(), canvas.getHeight());
-	int start_x = 0;
-	int start_y = 0;
+	string ss = "SavedData/test.dat";
+	//load the game data from test.dat
+	LoadGame(ss,s,h,itm);
 	while (running) {
 		canvas.checkInput();
 		canvas.clear();
 
 		float dt = tim.dt();
 		int x = 0, y = 0;
-		int move = static_cast<int>((300.f * dt));
+		int move = static_cast<int>((200.f * dt));
 		// Update game logic
 		if (canvas.keyPressed(VK_ESCAPE)) break;
 		if (canvas.keyPressed('W')) y -= move;
@@ -53,4 +57,7 @@ int main() {
 		if (!running)
 			break; // (待添加，弹出游戏结束的提示窗口)
 	}
+
+	// save the game data
+	SaveGame(ss, s, h, itm);
 }

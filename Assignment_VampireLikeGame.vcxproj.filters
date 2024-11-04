@@ -24,6 +24,9 @@
     <ClInclude Include="src\global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\SavedGameHandling.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -124,14 +127,26 @@
     <Image Include="Resources\blueProjectile.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Resources\projectile.png">
+    <Image Include="Resources\shoom.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Resources\shoom.png">
+    <Image Include="Resources\gab.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Item_Powerup.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\npcProjectile.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\skeleton.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\tiles.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SavedData\test.dat" />
   </ItemGroup>
 </Project>
