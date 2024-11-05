@@ -16,7 +16,7 @@ int main() {
 	float elapsedTime = 0.0f;
 	world w("Resources/tiles.txt");
 	Camera cm = Camera(canvas.getWidth(), canvas.getHeight());
-	hero h = hero(canvas.getWidth() / 2, canvas.getHeight() / 2, "Resources/hero.png");
+	hero h = hero(canvas.getWidth() / 2, canvas.getHeight() / 2, "Resources/hero_1.png");
 	swarm s;
 	items itm;
 	string ss = "SavedData/test.dat";
@@ -48,8 +48,9 @@ int main() {
 		if (canvas.keyPressed('A')) x -= move;
 		if (canvas.keyPressed('D')) x += move;
 
-		s.swarmUpdate(canvas, dt, h);
-		h.heroUpdate(canvas, x, y, dt, s, w.getMapWidth(), w.getMapHeight(), cm);
+		w.update(h,x, y, w.getMapWidth(), w.getMapHeight(), cm);
+		s.update(canvas, dt, h, w.getMapWidth(), w.getMapHeight());
+		h.hUpdate(canvas, x, y, dt, s, w.getMapWidth(), w.getMapHeight(), cm);
 		itm.update(canvas, dt, h);
 
 		w.draw(canvas, cm);

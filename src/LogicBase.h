@@ -48,7 +48,7 @@ namespace LogicBase {
 		}
 
 		// hero update
-		void update(int _x, int _y, float mapWidth, float mapHeight, Camera& cm) {
+		virtual void update(int _x, int _y, float mapWidth, float mapHeight, Camera& cm) {
 			pos.x += _x;
 			pos.y += _y;
 
@@ -188,7 +188,7 @@ namespace LogicBase {
 			delete p;
 		}
 
-		void update(Window& canvas, Character& h, float dt) override {
+		void update(float mapWidth, float mapHeight, Character& h, float dt) {
 			// 定时生成子弹
 			generateProjectile(h, dt);
 
@@ -196,8 +196,8 @@ namespace LogicBase {
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr) {
 					parray[i]->update(1.f);
-					if (parray[i]->pos.y + 2 > static_cast<int>(canvas.getHeight())
-						|| parray[i]->pos.x + 2 > static_cast<int>(canvas.getWidth())
+					if (parray[i]->pos.y + 2 > static_cast<int>(mapHeight)
+						|| parray[i]->pos.x + 2 > static_cast<int>(mapWidth)
 						|| parray[i]->pos.y - 2 < 0
 						|| parray[i]->pos.x - 2 < 0) {
 						deleteProjectile(i);
@@ -317,12 +317,17 @@ namespace LogicBase {
 		}
 
 		// npc逻辑更新
-		void swarmUpdate(Window& canvas, float dt, Character& h) {
+		void update(Window& canvas, float dt, Character& h, float mapWidth, float mapHeight) {
 			int npcType = rand() % 4;
 			generateNpc(canvas, dt, npcType);
 			for (int i = 0; i < currentSize; i++) {
 				if (sarray[i] != nullptr) {
-					sarray[i]->update(canvas, h, dt);
+					if (dynamic_cast<npc3*>(sarray[i])) {
+						npc3* n3 = dynamic_cast<npc3*>(sarray[i]);
+						n3->update(mapWidth, mapHeight, h, dt);
+					}
+					else
+						sarray[i]->update(canvas, h, dt);
 					// 待修改(npc跑到地图外后删除的条件需完善)
 				}
 			}
@@ -449,9 +454,12 @@ namespace LogicBase {
 	class hero : public Character {
 		float timeElapsed = 0;
 		float aoeTimeElapsed = 0;
-		float projectileInterval = 1.f;
+		int currentFrame;
+		float frameTime;
 		float aoeCooldownDuration = 10.0f;
+		Image frames[4];
 	public:
+		float projectileInterval = 1.5f;
 		int currentSize = 0;
 		Projectile* parray[maxSiz];
 
@@ -459,19 +467,25 @@ namespace LogicBase {
 			delete hp;
 			hp = new Health(200.f);
 			speed = 5.f;
+			pos.x = _x;
+			pos.y = _y;
+
+			for (int i = 0; i < 4; ++i) {
+				frames[i].load("Resources/hero_" + std::to_string(i + 1) + ".png");
+			}
 		}
 
-		void heroUpdate(Window& canvas, float _x, float _y, float dt, swarm& s, float mapWidth, float mapHeight, Camera& cm) {
-			update(_x, _y, mapWidth, mapHeight, cm);
+		void hUpdate(Window& canvas, float _x, float _y, float dt, swarm& s, float mapWidth, float mapHeight, Camera& cm) {
+			updateFrame(dt);
 			generateProjectile(*this, dt, s);
 			checkCollision(canvas, s, dt);
 
-			// 子弹移动(delete逻辑待修改)
+			// 子弹移动
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr) {
 					parray[i]->update(heroProjectileSpeed);
-					if (parray[i]->pos.y + 2 > static_cast<int>(canvas.getHeight())
-						|| parray[i]->pos.x + 2 > static_cast<int>(canvas.getWidth())
+					if (parray[i]->pos.y + 2 > static_cast<int>(mapHeight)
+						|| parray[i]->pos.x + 2 > static_cast<int>(mapWidth)
 						|| parray[i]->pos.y - 2 < 0
 						|| parray[i]->pos.x - 2 < 0) {
 						deleteProjectile(i);
@@ -482,7 +496,7 @@ namespace LogicBase {
 
 		void draw(Window& canvas, Camera& cm) override {
 			// draw hero
-			renderImg(canvas, sprite, pos, cm);
+			renderImg(canvas, frames[currentFrame], pos, cm);
 
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr)
@@ -535,6 +549,15 @@ namespace LogicBase {
 		}
 
 	private:
+		void updateFrame(float dt) {
+			// 更新动画帧
+			frameTime += dt;
+			if (frameTime >= 0.5f) {
+				currentFrame = (currentFrame + 1) % 4;
+				frameTime = 0.f;
+			}
+		}
+
 		// find the closest npc
 		int findClosest(Character& h, swarm& s) {
 			int closestIndex = -1;
@@ -664,6 +687,8 @@ namespace LogicBase {
 				// 碰撞到增强道具并获得增强效果
 				if (upItems[i]->collide(h)) {
 					heroProjectileSpeed += 1.f;
+					h.projectileInterval -= 0.1f;
+					h.projectileInterval = max(0.5f, h.projectileInterval);
 					aoeNumber += 1;
 					deleteItem(i);
 				}
