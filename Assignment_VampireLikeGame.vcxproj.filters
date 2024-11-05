@@ -27,6 +27,18 @@
     <ClInclude Include="src\SavedGameHandling.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\world.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vector2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\health.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -35,118 +47,17 @@
     <ClCompile Include="src\global.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Resources\0.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\1.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\2.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\3.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\4.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\5.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\6.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\7.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\8.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\9.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\10.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\11.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\12.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\13.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\14.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\15.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\16.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\17.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\18.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\19.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\20.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\21.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\22.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\23.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\L2.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\L.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\grass.jpeg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\hero.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\wizard.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\blueProjectile.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\shoom.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\gab.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\Item_Powerup.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\npcProjectile.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\skeleton.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Resources\tiles.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="SavedData\test.dat" />
+    <ClCompile Include="src\world.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vector2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\health.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

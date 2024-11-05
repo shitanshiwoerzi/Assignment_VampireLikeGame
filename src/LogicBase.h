@@ -6,273 +6,15 @@
 #include <cmath>
 #include <corecrt_math_defines.h>
 #include "global.h"
+#include "Vector2D.h"
+#include "camera.h"
+#include "health.h"
 
 using namespace GamesEngineeringBase;
 using namespace std;
 
 namespace LogicBase {
 	const int maxSiz = 10000;
-
-	class Vector2D {
-	public:
-		float x;
-		float y;
-
-		Vector2D() {
-			x = 0;
-			y = 0;
-		}
-
-		Vector2D(float _x, float _y) {
-			x = _x;
-			y = _y;
-		}
-
-		// 返回两点之间的距离
-		float distance(Vector2D pos) {
-			return sqrtf(pow(x - pos.x, 2) + pow(y - pos.y, 2));
-		}
-
-		Vector2D operator+(Vector2D const& vec) {
-			Vector2D res;
-			res.x = x + vec.x;
-			res.y = y + vec.y;
-			return res;
-		}
-
-		Vector2D operator-(Vector2D const& vec) {
-			Vector2D res;
-			res.x = x - vec.x;
-			res.y = y - vec.y;
-			return res;
-		}
-
-		void save(ofstream& binout) {
-			binout.write((char*)&x, sizeof(x));
-			binout.write((char*)&y, sizeof(y));
-		}
-
-		void load(ifstream& infile) {
-			infile.read((char*)&x, sizeof(x));
-			infile.read((char*)&y, sizeof(x));
-		}
-	};
-
-	class Shape {
-	public:
-		virtual bool inside(Vector2D vec) = 0;
-		virtual float area() = 0;
-		virtual void Draw(Window& canvas) = 0;
-	};
-
-	class Circle : public Shape {
-	public:
-		Vector2D cp;
-		float radius;
-
-		Circle() {
-			cp = Vector2D(0, 0);
-			radius = 0;
-		}
-
-		Circle(Vector2D _cp, float _radius) {
-			cp = _cp;
-			radius = _radius;
-		}
-
-		bool inside(Vector2D vec) {
-			// (point - cp )length
-			float length = sqrtf(pow((vec.x - cp.x), 2) + pow((vec.y - cp.y), 2));
-			if (length < radius) return true;
-			return false;
-		}
-
-		float area() {
-			return M_PI * pow(radius, 2);
-		}
-
-		void Draw(Window& canvas) {
-			for (int i = (cp.x - radius); i < (cp.x + radius); i++) {
-				for (int j = (cp.y - radius); j < (cp.y + radius); j++) {
-					if (inside(Vector2D(i, j)))
-						canvas.draw(i, j, 0, 255, 255);
-				}
-			}
-		}
-	};
-
-	class Rect : public Shape {
-	public:
-		Vector2D s;
-		Vector2D e;
-		int r = 0;
-		int g = 0;
-		int b = 255;
-
-		Rect() {
-			s = Vector2D(0, 0);
-			e = Vector2D(0, 0);
-		}
-
-		Rect(Vector2D _s, Vector2D _e) {
-			s = _s;
-			e = _e;
-		}
-
-		Rect(Vector2D _s, Vector2D _e, int _r, int _g, int _b) {
-			s = _s;
-			e = _e;
-			r = _r;
-			g = _g;
-			b = _b;
-		}
-		bool inside(Vector2D vec) {
-			if (vec.x > s.x && vec.x < e.x) {
-				if (vec.y > s.y && vec.y < e.y) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		float area() {
-			float xs;
-			float ys;
-			xs = e.x - s.x;
-			ys = e.y - s.y;
-			return(xs * ys);
-		}
-
-		void Draw(Window& canvas) {
-			for (int i = s.x; i < e.x; i++) {
-				if (i < canvas.getWidth() && i >= 0) {
-					for (int j = s.y; j < e.y; j++) {
-						if (j < canvas.getHeight() && j >= 0) {
-							if (inside(Vector2D(i, j)))
-								canvas.draw(i, j, r, g, b);
-						}
-					}
-				}
-
-			}
-		}
-	};
-
-	class Health {
-		float maxHp;
-		float currentHp;
-	public:
-		Health() {}
-
-		Health(float _max) {
-			maxHp = _max;
-			currentHp = maxHp;
-		}
-
-		void takeDamage(float damage) {
-			currentHp -= damage;
-			if (currentHp < 0) currentHp = 0;
-		}
-
-		void heal(float amount) {
-			currentHp += amount;
-			if (currentHp > maxHp) currentHp = maxHp;
-		}
-
-		bool isDead() const {
-			return currentHp <= 0;
-		}
-
-		float getHp() const {
-			return currentHp;
-		}
-
-		float getMaxHp() const {
-			return maxHp;
-		}
-
-		void save(ofstream& binout) {
-			binout.write((char*)&maxHp, sizeof(maxHp));
-			binout.write((char*)&currentHp, sizeof(currentHp));
-		}
-
-		void load(ifstream& infile) {
-			infile.read((char*)&maxHp, sizeof(maxHp));
-			infile.read((char*)&currentHp, sizeof(currentHp));
-		}
-	};
-
-	class Camera {
-	public:
-		Vector2D m_Position;
-
-		float width;
-		float height;
-
-		Camera(int w, int h) : m_Position(Vector2D()), width(w), height(h) {}
-
-		void update(float targetX, float targetY, Image& sprite) {
-			// Center the camera on the target (player)
-			m_Position.x = targetX + sprite.width - width / 2;
-			m_Position.y = targetY + sprite.width - height / 2;
-		}
-	};
-
-	class Tile {
-		Image sprite;
-	public:
-		Tile() {}
-
-		void load(string filename) {
-			sprite.load(filename);
-		}
-
-		void draw(Window& canvas, int y) {
-			for (unsigned int i = 0; i < sprite.height; i++) {
-				// bounds checking
-				if (y + i > 0 && (y + i) < canvas.getHeight()) {
-					for (unsigned int j = 0; j < sprite.width; j++)
-					{
-						canvas.draw(j, y + i, sprite.atUnchecked(j, i));
-					}
-				}
-
-			}
-		}
-	};
-
-	const unsigned int tileSiz = 24;
-	class TileSet {
-		Tile tiles[tileSiz];
-		int currentSize = 0;
-		unsigned int size = tileSiz;
-	public:
-		TileSet() {}
-
-		void load() {
-			for (int i = 0; i < size; i++) {
-				string filename;
-				filename = "Resources/" + to_string(i) + ".png";
-				tiles[i].load(filename);
-			}
-		}
-
-		Tile& operator[](int index) { return tiles[index]; }
-	};
-
-	void renderImg(Window& canvas, Image& sprite, Vector2D& pos, Camera& cm) {
-		for (unsigned int i = 0; i < sprite.height; i++) {
-			if (pos.y + i - cm.m_Position.y < canvas.getHeight() && pos.y + i - cm.m_Position.y >= 0) {
-				for (unsigned int n = 0; n < sprite.width; n++)
-				{
-					if (pos.x + n - cm.m_Position.x < canvas.getWidth() && pos.x + n - cm.m_Position.x >= 0) {
-						if (sprite.alphaAt(n, i) > 200)
-							canvas.draw(pos.x + n - cm.m_Position.x, pos.y + i - cm.m_Position.y, sprite.at(n, i));
-					}
-				}
-			}
-		}
-	}
 
 	class Character {
 	protected:
@@ -305,14 +47,16 @@ namespace LogicBase {
 			pos.y += vec.y * arg;
 		}
 
-		void update(Window& canvas, int _x, int _y) {
+		// hero update
+		void update(int _x, int _y, float mapWidth, float mapHeight, Camera& cm) {
 			pos.x += _x;
 			pos.y += _y;
 
 			if (pos.x < 0) pos.x = 0;
-			if (pos.x < 0) pos.x = 0;
-			if (pos.x + sprite.width > canvas.getWidth()) pos.x = canvas.getWidth() - sprite.width;
-			if (pos.x + sprite.height > canvas.getHeight()) pos.x = canvas.getHeight() - sprite.height;
+			if (pos.y < 0) pos.y = 0;
+			if (pos.x + sprite.width > mapWidth) pos.x = mapWidth - sprite.width;
+			if (pos.y + sprite.height > mapHeight) pos.y = mapHeight - sprite.height;
+			cm.update(pos.x, pos.y, mapWidth, mapHeight, sprite);
 		}
 
 		virtual void draw(Window& canvas, Camera& cm) {
@@ -717,8 +461,8 @@ namespace LogicBase {
 			speed = 5.f;
 		}
 
-		void heroUpdate(Window& canvas, float _x, float _y, float dt, swarm& s) {
-			update(canvas, _x, _y);
+		void heroUpdate(Window& canvas, float _x, float _y, float dt, swarm& s, float mapWidth, float mapHeight, Camera& cm) {
+			update(_x, _y, mapWidth, mapHeight, cm);
 			generateProjectile(*this, dt, s);
 			checkCollision(canvas, s, dt);
 
@@ -737,7 +481,7 @@ namespace LogicBase {
 		}
 
 		void draw(Window& canvas, Camera& cm) override {
-			// draw the npc
+			// draw hero
 			renderImg(canvas, sprite, pos, cm);
 
 			for (int i = 0; i < currentSize; i++) {
@@ -953,7 +697,7 @@ namespace LogicBase {
 				infile.read((char*)&exists, sizeof(exists));
 				if (exists) {
 					if (upItems[i] == nullptr) {
-						upItems[i] = new powerUp(0,0);
+						upItems[i] = new powerUp(0, 0);
 					}
 					upItems[i]->load(infile);
 				}

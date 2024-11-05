@@ -3,6 +3,7 @@
 #include "global.h"
 #include <string>
 #include "SavedGameHandling.h"
+#include "world.h"
 
 using namespace GamesEngineeringBase;
 using namespace LogicBase;
@@ -13,20 +14,35 @@ int main() {
 	Image background;
 	background.load("Resources/grass.jpeg");
 	Timer tim;
+	int frameCount = 0;
+	float elapsedTime = 0.0f;
+	world w("Resources/tiles.txt");
+	Camera cm = Camera(canvas.getWidth(), canvas.getHeight());
 	hero h = hero(canvas.getWidth() / 2, canvas.getHeight() / 2, "Resources/hero.png");
 	swarm s;
 	items itm;
-	Camera cm = Camera(canvas.getWidth(), canvas.getHeight());
 	string ss = "SavedData/test.dat";
 	//load the game data from test.dat
-	LoadGame(ss,s,h,itm);
+	//LoadGame(ss, s, h, itm);
 	while (running) {
 		canvas.checkInput();
 		canvas.clear();
 
 		float dt = tim.dt();
+		elapsedTime += dt;
+		frameCount++;
+		// 每秒更新一次 FPS
+		if (elapsedTime >= 1.0f) {
+			float fps = frameCount / elapsedTime;
+			frameCount = 0;
+			elapsedTime = 0.0f;
+
+			// 输出FPS
+			std::cout << " FPS: " << fps << std::endl;
+		}
+
 		int x = 0, y = 0;
-		int move = static_cast<int>((200.f * dt));
+		int move = static_cast<int>((500.f * dt));
 		// Update game logic
 		if (canvas.keyPressed(VK_ESCAPE)) break;
 		if (canvas.keyPressed('W')) y -= move;
@@ -35,20 +51,10 @@ int main() {
 		if (canvas.keyPressed('D')) x += move;
 
 		s.swarmUpdate(canvas, dt, h);
-		h.heroUpdate(canvas, x, y, dt, s);
+		h.heroUpdate(canvas, x, y, dt, s, w.getMapWidth(), w.getMapHeight(), cm);
 		itm.update(canvas, dt, h);
-		cm.update(h.pos.x, h.pos.y, h.sprite);
 
-		// Draw(); 
-		for (int i = 0; i < canvas.getWidth(); i++) {
-			if (i - cm.m_Position.x >= 0 && i - cm.m_Position.x < canvas.getWidth()) {
-				for (int j = 0; j < canvas.getHeight(); j++) {
-					if (j - cm.m_Position.y >= 0 && j - cm.m_Position.y < canvas.getHeight())
-						canvas.draw(i - cm.m_Position.x, j - cm.m_Position.y, background.at(i, j));
-				}
-			}
-		}
-
+		w.draw(canvas, cm);
 		itm.draw(canvas, cm);
 		s.draw(canvas, cm);
 		h.draw(canvas, cm);

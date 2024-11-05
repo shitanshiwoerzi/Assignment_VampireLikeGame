@@ -127,57 +127,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\GamesEngineeringBase.h" />
     <ClInclude Include="src\global.h" />
+    <ClInclude Include="src\health.h" />
     <ClInclude Include="src\LogicBase.h" />
     <ClInclude Include="src\SavedGameHandling.h" />
+    <ClInclude Include="src\Vector2D.h" />
+    <ClInclude Include="src\world.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\global.cpp" />
+    <ClCompile Include="src\health.cpp" />
     <ClCompile Include="src\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Resources\0.png" />
-    <Image Include="Resources\1.png" />
-    <Image Include="Resources\10.png" />
-    <Image Include="Resources\11.png" />
-    <Image Include="Resources\12.png" />
-    <Image Include="Resources\13.png" />
-    <Image Include="Resources\14.png" />
-    <Image Include="Resources\15.png" />
-    <Image Include="Resources\16.png" />
-    <Image Include="Resources\17.png" />
-    <Image Include="Resources\18.png" />
-    <Image Include="Resources\19.png" />
-    <Image Include="Resources\2.png" />
-    <Image Include="Resources\20.png" />
-    <Image Include="Resources\21.png" />
-    <Image Include="Resources\22.png" />
-    <Image Include="Resources\23.png" />
-    <Image Include="Resources\3.png" />
-    <Image Include="Resources\4.png" />
-    <Image Include="Resources\5.png" />
-    <Image Include="Resources\6.png" />
-    <Image Include="Resources\7.png" />
-    <Image Include="Resources\8.png" />
-    <Image Include="Resources\9.png" />
-    <Image Include="Resources\blueProjectile.png" />
-    <Image Include="Resources\gab.png" />
-    <Image Include="Resources\grass.jpeg" />
-    <Image Include="Resources\hero.png" />
-    <Image Include="Resources\Item_Powerup.png" />
-    <Image Include="Resources\L.png" />
-    <Image Include="Resources\L2.png" />
-    <Image Include="Resources\npcProjectile.png" />
-    <Image Include="Resources\shoom.png" />
-    <Image Include="Resources\skeleton.png" />
-    <Image Include="Resources\wizard.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Resources\tiles.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="SavedData\test.dat" />
+    <ClCompile Include="src\Vector2D.cpp" />
+    <ClCompile Include="src\world.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
