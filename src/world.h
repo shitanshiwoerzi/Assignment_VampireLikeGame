@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include "GamesEngineeringBase.h"
-#include "LogicBase.h"
+#include "camera.h"
 
 class tile {
 	GamesEngineeringBase::Image sprite;
@@ -24,10 +24,10 @@ class world {
 	int tileheight;
 	tile** tiles;
 public:
-	world(string filename);
+	world(std::string filename);
 	void draw(GamesEngineeringBase::Window& canvas, Camera& cm);
 	int getMapWidth();
 	int getMapHeight();
 private:
-	void skipLine(ifstream& infile, int lineNumber);
+	void skipLine(std::ifstream& infile, int lineNumber);
 };

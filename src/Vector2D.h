@@ -1,6 +1,4 @@
 ﻿#pragma once
-#include <corecrt_math.h>
-#include <fstream>
 #include <fstream>
 
 class Vector2D {

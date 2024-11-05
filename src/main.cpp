@@ -11,8 +11,6 @@ using namespace LogicBase;
 int main() {
 	Window canvas;
 	canvas.create(1024, 768, "Vampire Survivor");
-	Image background;
-	background.load("Resources/grass.jpeg");
 	Timer tim;
 	int frameCount = 0;
 	float elapsedTime = 0.0f;

@@ -16,8 +16,8 @@ GamesEngineeringBase::Image& tile::getSprite() { return sprite; }
 
 
 
-world::world(string filename) { // load from file name
-	ifstream infile(filename);
+world::world(std::string filename) { // load from file name
+	std::ifstream infile(filename);
 	std::string line;
 	infile >> line;
 	if (line == "tileswide") infile >> tileswide;
@@ -46,7 +46,7 @@ world::world(string filename) { // load from file name
 				pos++;
 			}
 
-			string filename = "Resources/tiles/" + to_string(num) + ".png";
+			std::string filename = "Resources/tiles/" + std::to_string(num) + ".png";
 			tiles[i][j].load(filename);
 			pos++;
 		}
@@ -79,9 +79,9 @@ int world::getMapHeight() {
 	return tileshigh * tileheight;
 }
 
-void world::skipLine(ifstream& infile, int lineNumber) {
-	string line;
+void world::skipLine(std::ifstream& infile, int lineNumber) {
+	std::string line;
 	for (int i = 0; i < lineNumber; i++) {
-		getline(infile, line);
+		std::getline(infile, line);
 	}
 }
