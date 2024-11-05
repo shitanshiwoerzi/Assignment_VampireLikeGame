@@ -12,6 +12,8 @@ extern float heroProjectileSpeed;
 extern float npcProjectileSpeed;
 extern int aoeNumber;
 
+void vecNormalize(Vector2D& vec);
+
 void saveString(std::ofstream& binout, const std::string& str);
 
 std::string loadString(std::ifstream& infile);

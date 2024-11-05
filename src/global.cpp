@@ -2,8 +2,17 @@
 
 bool running = true;
 bool aoeTriggered = false; // status of AOE trigger key 'J' 
-float heroProjectileSpeed = 3.f; 
+float heroProjectileSpeed = 100.f; 
 int aoeNumber = 5;
+
+// vector normalization
+void vecNormalize(Vector2D& vec) {
+	float length = std::sqrtf(std::pow(vec.x, 2) + std::pow(vec.y, 2));
+	if (length != 0) {
+		vec.x /= length;
+		vec.y /= length;
+	}
+}
 
 void saveString(std::ofstream& binout, const std::string& str) {
     size_t length = str.size();

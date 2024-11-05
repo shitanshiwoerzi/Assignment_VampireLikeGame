@@ -35,14 +35,17 @@ namespace LogicBase {
 			sprite.load(filename);
 		}
 
+		// default
 		void update(float _x, float _y) {
 			pos.x += _x;
 			pos.y += _y;
 		}
 
+		// npc update
 		virtual void update(Window& canvas, Character& h, float dt) {
-			float arg = speed / 5000;
 			Vector2D vec = h.pos - pos;
+			vecNormalize(vec);
+			float arg = speed * dt * 10;
 			pos.x += vec.x * arg;
 			pos.y += vec.y * arg;
 		}
@@ -96,7 +99,7 @@ namespace LogicBase {
 	public:
 		Image sprite;
 		Vector2D pos;
-		float speed = 1.f;
+		float speed = 15.f;
 
 
 		Projectile(string filename) { sprite.load(filename); }
@@ -107,10 +110,12 @@ namespace LogicBase {
 			sprite.load(filename);
 		}
 
-		void update(int arg) {
-			speed = arg;
-			pos.x += vel.x * (speed / 300);
-			pos.y += vel.y * (speed / 300);
+		void update(int _speed, float dt) {
+			speed = _speed;
+			vecNormalize(vel);
+			float arg = speed * dt * 10;
+			pos.x += vel.x * arg;
+			pos.y += vel.y * arg;
 		}
 
 		void draw(Window& canvas, Camera& cm) {
@@ -195,7 +200,7 @@ namespace LogicBase {
 			// 子弹移动
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr) {
-					parray[i]->update(1.f);
+					parray[i]->update(parray[i]->speed, dt);
 					if (parray[i]->pos.y + 2 > static_cast<int>(mapHeight)
 						|| parray[i]->pos.x + 2 > static_cast<int>(mapWidth)
 						|| parray[i]->pos.y - 2 < 0
@@ -483,7 +488,7 @@ namespace LogicBase {
 			// 子弹移动
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr) {
-					parray[i]->update(heroProjectileSpeed);
+					parray[i]->update(heroProjectileSpeed, dt);
 					if (parray[i]->pos.y + 2 > static_cast<int>(mapHeight)
 						|| parray[i]->pos.x + 2 > static_cast<int>(mapWidth)
 						|| parray[i]->pos.y - 2 < 0
@@ -686,9 +691,10 @@ namespace LogicBase {
 			for (int i = 0; i < currentSize; i++) {
 				// 碰撞到增强道具并获得增强效果
 				if (upItems[i]->collide(h)) {
-					heroProjectileSpeed += 1.f;
-					h.projectileInterval -= 0.1f;
-					h.projectileInterval = max(0.5f, h.projectileInterval);
+					heroProjectileSpeed += 10.f;
+					h.projectileInterval -= 0.2f;
+					heroProjectileSpeed = min(heroProjectileSpeed, 200.f);
+					h.projectileInterval = max(0.1f, h.projectileInterval);
 					aoeNumber += 1;
 					deleteItem(i);
 				}
