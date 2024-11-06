@@ -5,12 +5,19 @@
 #include <iostream>
 #include "Vector2D.h"
 #include "camera.h"
+#include <vector>
 
 extern bool running;
 extern bool aoeTriggered;
 extern float heroProjectileSpeed;
 extern float npcProjectileSpeed;
 extern int aoeNumber;
+
+struct Effect {
+    Vector2D position;
+    float duration;
+    float elapsedTime;
+};
 
 void vecNormalize(Vector2D& vec);
 

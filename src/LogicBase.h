@@ -9,7 +9,7 @@
 #include "Vector2D.h"
 #include "camera.h"
 #include "health.h"
-#include <thread>
+#include <vector>
 
 using namespace GamesEngineeringBase;
 using namespace std;
@@ -325,7 +325,7 @@ namespace LogicBase {
 		// npc逻辑更新
 		void update(Window& canvas, float dt, Character& h, float mapWidth, float mapHeight) {
 			int npcType = rand() % 4;
-			generateNpc(canvas, dt, npcType);
+			generateNpc(mapWidth, mapHeight, dt, npcType);
 			for (int i = 0; i < currentSize; i++) {
 				if (sarray[i] != nullptr) {
 					if (dynamic_cast<npc3*>(sarray[i])) {
@@ -386,23 +386,23 @@ namespace LogicBase {
 
 	private:
 		// 定时生成npc
-		void generateNpc(Window& canvas, float dt, int npcType) {
+		void generateNpc(float mapWidth, float mapHeight, float dt, int npcType) {
 			timeElapsed += dt;
 			if (timeElapsed > timeThreshold) {
 				Character* p;
 				int direction = rand() % 4;
 				int x, y; // generated postion
 				switch (direction) {
-				case 0: x = rand() % canvas.getWidth(); y = -200; break; // top
-				case 1: x = rand() % canvas.getWidth(); y = canvas.getHeight() + 200; break; // bottom
-				case 2: x = -200; y = rand() % canvas.getHeight(); break; // left
-				case 3: x = canvas.getWidth() + 200; y = rand() % canvas.getHeight(); break; // right
+				case 0: x = rand() % static_cast<int>(mapWidth); y = -200; break; // top
+				case 1: x = rand() % static_cast<int>(mapWidth); y = static_cast<int>(mapHeight) + 200; break; // bottom
+				case 2: x = -200; y = rand() % static_cast<int>(mapHeight); break; // left
+				case 3: x = static_cast<int>(mapWidth) + 200; y = rand() % static_cast<int>(mapHeight); break; // right
 				}
 
 				if (npcType == 0) p = new npc1(x, y, "Resources/shoom.png");
 				else if (npcType == 1) p = new npc2(x, y, "Resources/gab.png");
 				else if (npcType == 2) p = new npc4(x, y, "Resources/skeleton.png");
-				else p = new npc3(rand() % canvas.getWidth(), rand() % canvas.getHeight(), "Resources/wizard.png");
+				else p = new npc3(rand() % static_cast<int>(mapWidth), static_cast<int>(mapHeight), "Resources/wizard.png");
 
 				if (p == nullptr) {
 					cout << "Character is null" << endl;
@@ -463,9 +463,10 @@ namespace LogicBase {
 		int currentFrame;
 		float frameTime;
 		float aoeCooldownDuration = 1.0f;
-		Image frames[4];
+		Image heroFrames[4];
 		Image lightning;
 	public:
+		std::vector<Effect> activeEffects;
 		float projectileInterval = 1.5f;
 		int currentSize = 0;
 		Projectile* parray[maxSiz];
@@ -478,7 +479,7 @@ namespace LogicBase {
 			pos.y = _y;
 			lightning.load("Resources/lightning_strike_long.png");
 			for (int i = 0; i < 4; ++i) {
-				frames[i].load("Resources/hero_" + std::to_string(i + 1) + ".png");
+				heroFrames[i].load("Resources/hero_" + std::to_string(i + 1) + ".png");
 			}
 		}
 
@@ -486,6 +487,7 @@ namespace LogicBase {
 			updateFrame(dt);
 			generateProjectile(*this, dt, s);
 			checkCollision(canvas, s, dt, cm);
+			updateEffects(canvas, cm, dt);
 
 			// 子弹移动
 			for (int i = 0; i < currentSize; i++) {
@@ -503,7 +505,7 @@ namespace LogicBase {
 
 		void draw(Window& canvas, Camera& cm) override {
 			// draw hero
-			renderImg(canvas, frames[currentFrame], pos, cm);
+			renderImg(canvas, heroFrames[currentFrame], pos, cm);
 
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr)
@@ -562,6 +564,20 @@ namespace LogicBase {
 			if (frameTime >= 0.5f) {
 				currentFrame = (currentFrame + 1) % 4;
 				frameTime = 0.f;
+			}
+		}
+
+		// 用于更新AOE渲染(防止渲染逻辑在每一帧都被重置)
+		void updateEffects(Window& canvas, Camera& cm, float dt) {
+			for (auto it = activeEffects.begin(); it != activeEffects.end(); ) {
+				it->elapsedTime += dt;
+				if (it->elapsedTime < it->duration) {
+					renderImg(canvas, lightning, it->position, cm);
+					++it;
+				}
+				else {
+					it = activeEffects.erase(it);
+				}
 			}
 		}
 
@@ -656,10 +672,12 @@ namespace LogicBase {
 					// 对该NPC进行攻击
 					cout << "Attacking NPC" << typeid(*s.sarray[maxIndex]).name()
 						<< "with health : " << npc->getHealth().getHp() << endl;
-					
+
 					// 实现aoe的视觉效果
 					Vector2D actualPos = Vector2D(npc->pos.x + npc->sprite.width - lightning.width / 2, npc->pos.y + npc->sprite.height - lightning.height);
-					renderImg(canvas, lightning, actualPos, cm);
+					//renderImg(canvas, lightning, actualPos, cm);
+					activeEffects.push_back({ actualPos, 0.2f, 0.0f });
+
 
 					// 假设攻击减少50点生命值
 					npc->getHealth().takeDamage(200);

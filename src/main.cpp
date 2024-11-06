@@ -49,11 +49,11 @@ int main() {
 		if (canvas.keyPressed('D')) x += move;
 		w.draw(canvas, cm);
 
-		w.update(h,x, y, w.getMapWidth(), w.getMapHeight(), cm);
+		w.update(h, x, y, w.getMapWidth(), w.getMapHeight(), cm);
 		s.update(canvas, dt, h, w.getMapWidth(), w.getMapHeight());
 		h.hUpdate(canvas, x, y, dt, s, w.getMapWidth(), w.getMapHeight(), cm);
 		itm.update(canvas, dt, h);
-		
+
 		itm.draw(canvas, cm);
 		s.draw(canvas, cm);
 		h.draw(canvas, cm);
