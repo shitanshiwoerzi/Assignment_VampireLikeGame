@@ -9,6 +9,7 @@
 #include "Vector2D.h"
 #include "camera.h"
 #include "health.h"
+#include <thread>
 
 using namespace GamesEngineeringBase;
 using namespace std;
@@ -461,8 +462,9 @@ namespace LogicBase {
 		float aoeTimeElapsed = 0;
 		int currentFrame;
 		float frameTime;
-		float aoeCooldownDuration = 10.0f;
+		float aoeCooldownDuration = 1.0f;
 		Image frames[4];
+		Image lightning;
 	public:
 		float projectileInterval = 1.5f;
 		int currentSize = 0;
@@ -474,7 +476,7 @@ namespace LogicBase {
 			speed = 5.f;
 			pos.x = _x;
 			pos.y = _y;
-
+			lightning.load("Resources/lightning_strike_long.png");
 			for (int i = 0; i < 4; ++i) {
 				frames[i].load("Resources/hero_" + std::to_string(i + 1) + ".png");
 			}
@@ -483,7 +485,7 @@ namespace LogicBase {
 		void hUpdate(Window& canvas, float _x, float _y, float dt, swarm& s, float mapWidth, float mapHeight, Camera& cm) {
 			updateFrame(dt);
 			generateProjectile(*this, dt, s);
-			checkCollision(canvas, s, dt);
+			checkCollision(canvas, s, dt, cm);
 
 			// 子弹移动
 			for (int i = 0; i < currentSize; i++) {
@@ -580,7 +582,7 @@ namespace LogicBase {
 		}
 
 		// hero的攻击碰撞检测
-		void checkCollision(Window& canvas, swarm& s, float dt) {
+		void checkCollision(Window& canvas, swarm& s, float dt, Camera& cm) {
 			// linear attack 
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr) {
@@ -601,7 +603,7 @@ namespace LogicBase {
 			if (canvas.keyPressed('J') && aoeTimeElapsed >= aoeCooldownDuration) {
 				if (!aoeTriggered) {
 					cout << "Use Aoe skill" << endl;
-					triggerAOE(canvas, s, aoeNumber); // the number should not be fixed
+					triggerAOE(canvas, s, aoeNumber, cm, dt); // the number should not be fixed
 					aoeTriggered = true;
 					aoeTimeElapsed = 0;
 				}
@@ -634,7 +636,7 @@ namespace LogicBase {
 		}
 
 		// 选择生命值最高的前N个NPC并对其进行攻击
-		void triggerAOE(Window& canvas, swarm& s, int N) {
+		void triggerAOE(Window& canvas, swarm& s, int N, Camera& cm, float dt) {
 			for (int n = 0; n < N; n++) {
 				int maxIndex = -1;
 				float maxHealth = -100.f;
@@ -654,7 +656,10 @@ namespace LogicBase {
 					// 对该NPC进行攻击
 					cout << "Attacking NPC" << typeid(*s.sarray[maxIndex]).name()
 						<< "with health : " << npc->getHealth().getHp() << endl;
-					// to-do 实现aoe的视觉效果
+					
+					// 实现aoe的视觉效果
+					Vector2D actualPos = Vector2D(npc->pos.x + npc->sprite.width - lightning.width / 2, npc->pos.y + npc->sprite.height - lightning.height);
+					renderImg(canvas, lightning, actualPos, cm);
 
 					// 假设攻击减少50点生命值
 					npc->getHealth().takeDamage(200);
