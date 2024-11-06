@@ -230,9 +230,8 @@ namespace LogicBase {
 			for (int i = 0; i < currentSize; i++) {
 				bool exists = (parray[i] != nullptr);
 				binout.write((char*)&exists, sizeof(exists));
-				if (exists) {
+				if (exists)
 					parray[i]->save(binout);
-				}
 			}
 		}
 
@@ -370,7 +369,10 @@ namespace LogicBase {
 				if (exists) {
 					if (sarray[i] == nullptr) {
 						string filename = loadString(infile); // 读取文件路径
-						sarray[i] = new Character(0, 0, filename); // 使用文件路径创建对象
+						if (filename == "Resources/wizard.png")
+							sarray[i] = new npc3(0, 0, filename);
+						else
+							sarray[i] = new Character(0, 0, filename); // 使用文件路径创建对象
 					}
 
 					sarray[i]->load(infile);
@@ -402,7 +404,7 @@ namespace LogicBase {
 				if (npcType == 0) p = new npc1(x, y, "Resources/shoom.png");
 				else if (npcType == 1) p = new npc2(x, y, "Resources/gab.png");
 				else if (npcType == 2) p = new npc4(x, y, "Resources/skeleton.png");
-				else p = new npc3(rand() % static_cast<int>(mapWidth), static_cast<int>(mapHeight), "Resources/wizard.png");
+				else p = new npc3(rand() % static_cast<int>(mapWidth), rand() % static_cast<int>(mapHeight), "Resources/wizard.png");
 
 				if (p == nullptr) {
 					cout << "Character is null" << endl;

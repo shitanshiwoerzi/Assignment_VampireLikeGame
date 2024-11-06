@@ -21,7 +21,7 @@ int main() {
 	items itm;
 	string ss = "SavedData/test.dat";
 	//load the game data from test.dat
-	//LoadGame(ss, s, h, itm);
+	LoadGame(ss, s, h, itm);
 	while (running) {
 		canvas.checkInput();
 		canvas.clear();

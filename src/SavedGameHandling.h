@@ -8,8 +8,8 @@ using namespace LogicBase;
 
 void SaveGame(string& filename, swarm& s, hero& h, items& itm) {
 	ofstream binout(filename, ios::binary);
-	itm.save(binout);
 	h.save(binout);
+	itm.save(binout);
 	s.save(binout);
 	binout.close();
 
@@ -17,8 +17,8 @@ void SaveGame(string& filename, swarm& s, hero& h, items& itm) {
 
 void LoadGame(string& filename, swarm& s, hero& h, items& itm) {
 	ifstream infile(filename, ios::binary);
-	itm.load(infile);
 	h.load(infile);
+	itm.load(infile);
 	s.load(infile);
 	infile.close();
 }

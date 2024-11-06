@@ -23,7 +23,7 @@ void saveString(std::ofstream& binout, const std::string& str) {
 std::string loadString(std::ifstream& infile) {
 	size_t length;
 	infile.read((char*)&length, sizeof(length)); // 读取字符串长度
-	if (!infile) {
+	if (!infile || length >= 99999) {
 		std::cerr << "Error reading length from file." << std::endl;
 		return "";
 	}
