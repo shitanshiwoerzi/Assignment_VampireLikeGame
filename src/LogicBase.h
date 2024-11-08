@@ -462,20 +462,24 @@ namespace LogicBase {
 		}
 	};
 
+	int const maxEffects = 1000;
 	/// <summary>
 	/// main character
 	/// </summary>
 	class hero : public Character {
 		float timeElapsed = 0;
 		float aoeTimeElapsed = 0;
+
+		int effectCount = 0;
 		int currentFrame;
 		float frameTime;
 		float aoeCooldownDuration = 10.0f;
 		Image heroFrames[4];
 		Image lightning;
 	public:
-		std::vector<Effect> activeEffects;
+		Effect activeEffects[maxEffects];
 		float projectileInterval = 1.5f;
+
 		int currentSize = 0;
 		Projectile* parray[maxSiz];
 
@@ -578,14 +582,17 @@ namespace LogicBase {
 
 		// Used to update the AOE rendering (prevents the rendering logic from being reset at every frame)
 		void updateEffects(Window& canvas, Camera& cm, float dt) {
-			for (auto it = activeEffects.begin(); it != activeEffects.end(); ) {
-				it->elapsedTime += dt;
-				if (it->elapsedTime < it->duration) {
-					renderImg(canvas, lightning, it->position, cm);
-					++it;
-				}
+			for (int i = 0; i < effectCount; i++) {
+				activeEffects[i].elapsedTime += dt;
+				if (activeEffects[i].elapsedTime < activeEffects[i].duration)
+					renderImg(canvas, lightning, activeEffects[i].position, cm);
 				else {
-					it = activeEffects.erase(it);
+					// remove the effect by shifting the remaining elements
+					for (int j = i; j < effectCount - 1; j++) {
+						activeEffects[j] = activeEffects[j + 1];
+					}
+					effectCount--;
+					i--; // adjust index to account for the removed element
 				}
 			}
 		}
@@ -685,7 +692,8 @@ namespace LogicBase {
 					// realizing the visual effects of aoe
 					Vector2D actualPos = Vector2D(npc->pos.x + npc->sprite.width - lightning.width / 2, npc->pos.y + npc->sprite.height - lightning.height);
 					//renderImg(canvas, lightning, actualPos, cm);
-					activeEffects.push_back({ actualPos, 0.2f, 0.0f });
+					Effect effect = { actualPos, 0.2f, 0.0f };
+					activeEffects[effectCount++] = effect;
 
 					// assuming the attack reduces life points by 200
 					npc->getHealth().takeDamage(200);

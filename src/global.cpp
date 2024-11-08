@@ -71,21 +71,21 @@ void renderImg(GamesEngineeringBase::Window& canvas, GamesEngineeringBase::Image
 // image pixel-level collision detection
 bool checkImageCollision(GamesEngineeringBase::Image& img1, unsigned int x1, unsigned int y1, GamesEngineeringBase::Image& img2, unsigned int x2, unsigned int y2)
 {
-	// 计算图片的重叠区域
-	unsigned int x_overlap_start = max(x1, x2);
-	unsigned int y_overlap_start = max(y1, y2);
-	unsigned int x_overlap_end = min(x1 + img1.width, x2 + img2.width);
-	unsigned int y_overlap_end = min(y1 + img1.height, y2 + img2.height);
+	// calculate the overlapping area of images
+	unsigned int xOverlapStart = max(x1, x2);
+	unsigned int yOverlapStart = max(y1, y2);
+	unsigned int xOverlapEnd = min(x1 + img1.width, x2 + img2.width);
+	unsigned int yOverlapEnd = min(y1 + img1.height, y2 + img2.height);
 
-	// 如果没有重叠, 返回false
-	if (x_overlap_start >= x_overlap_end || y_overlap_start >= y_overlap_end) return false;
+	// if without overlap return false
+	if (xOverlapStart >= xOverlapEnd || yOverlapStart >= yOverlapEnd) return false;
 
-	// Check each pixel in the overlapping area
-	for (unsigned int y = y_overlap_start; y < y_overlap_end; ++y)
+	// check each pixel in the overlapping area
+	for (unsigned int y = yOverlapStart; y < yOverlapEnd; ++y)
 	{
-		for (unsigned int x = x_overlap_start; x < x_overlap_end; ++x)
+		for (unsigned int x = xOverlapStart; x < xOverlapEnd; ++x)
 		{
-			//Get the relative positions in each image, check if both pixels are non-transparent
+			//get the relative positions in each image, check if both pixels are non-transparent
 			if (img1.alphaAt(x - x1, y - y1) > 0 && img2.alphaAt(x - x2, y - y2) > 0)
 				return true;
 		}

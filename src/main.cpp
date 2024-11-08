@@ -42,6 +42,8 @@ int main() {
 	}
 	else if (choice == 1) level = getLevel();
 	int wx = 0, wy = 0;
+
+	// fixed map game loop
 	if (level == 1) {
 		while (running) {
 			canvas.checkInput();
@@ -95,6 +97,8 @@ int main() {
 			}
 		}
 	}
+
+	// infinite map game loop(wait for updating)
 	else if (level == 2) {
 		while (running) {
 			canvas.checkInput();
