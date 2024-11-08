@@ -6,14 +6,13 @@
 #include "global.h"
 using namespace LogicBase;
 
-bool saveGame(string& filename, swarm& s, hero& h, items& itm) {
+void saveGame(string& filename, swarm& s, hero& h, items& itm) {
 	ofstream binout(filename, ios::binary);
 	h.save(binout);
 	itm.save(binout);
 	s.save(binout);
 	binout.write((char*)&score, sizeof(score));
 	binout.close();
-	return true;
 }
 
 void loadGame(string& filename, swarm& s, hero& h, items& itm) {

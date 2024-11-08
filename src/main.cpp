@@ -47,9 +47,13 @@ int main() {
 		if (canvas.keyPressed('A')) x -= move;
 		if (canvas.keyPressed('D')) x += move;
 		if (canvas.keyPressed('C')) {
-			if (saveGame(ss, s, h, itm))// save the game data
+			if (!saveTriggered) {
+				saveGame(ss, s, h, itm);// save the game data
 				std::cout << "Save success" << std::endl;
+				saveTriggered = true;
+			}
 		}
+		else saveTriggered = false;
 
 		w.draw(canvas, cm);
 		w.update(h, x, y, w.getMapWidth(), w.getMapHeight(), cm);

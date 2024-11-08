@@ -5,6 +5,7 @@ bool aoeTriggered = false; // status of AOE trigger key 'J'
 float heroProjectileSpeed = 100.f; 
 int aoeNumber = 5;
 float score = 0.f;
+bool saveTriggered = false;
 
 // vector normalization(to keep the npcs' speed consistent)
 void vecNormalize(Vector2D& vec) {
