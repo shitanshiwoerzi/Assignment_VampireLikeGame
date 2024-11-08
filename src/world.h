@@ -28,10 +28,14 @@ class world {
 	int tilewidth;
 	int tileheight;
 	tile** tiles;
+
 public:
 	world(std::string filename);
 	void update(LogicBase::hero& h, float x, float y, float mapWidth, float mapHeight, Camera& cm);
 	void draw(GamesEngineeringBase::Window& canvas, Camera& cm);
+	void draw(GamesEngineeringBase::Window& canvas, Camera& cm, int wx, int wy);
+	void drawTiles(GamesEngineeringBase::Window& canvas, Camera& cm, int n, int r, int xOffset, int yOffset,
+		int viewportLeft, int viewportRight, int viewportTop, int viewportBottom);
 	int getMapWidth();
 	int getMapHeight();
 private:

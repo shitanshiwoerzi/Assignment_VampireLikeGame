@@ -14,12 +14,17 @@ extern float npcProjectileSpeed;
 extern int aoeNumber;
 extern float score;
 extern bool saveTriggered;
+extern int level;
 
 struct Effect {
     Vector2D position;
     float duration;
     float elapsedTime;
 };
+
+bool fileExists(std::string filename);
+
+int getLevel();
 
 void vecNormalize(Vector2D& vec);
 

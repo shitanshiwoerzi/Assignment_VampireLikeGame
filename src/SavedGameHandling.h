@@ -12,6 +12,7 @@ void saveGame(string& filename, swarm& s, hero& h, items& itm) {
 	itm.save(binout);
 	s.save(binout);
 	binout.write((char*)&score, sizeof(score));
+	binout.write((char*)&level, sizeof(level));
 	binout.close();
 }
 
@@ -22,5 +23,6 @@ void loadGame(string& filename, swarm& s, hero& h, items& itm) {
 	itm.load(infile);
 	s.load(infile);
 	infile.read((char*)&score, sizeof(score));
+	infile.read((char*)&level, sizeof(level));
 	infile.close();
 }

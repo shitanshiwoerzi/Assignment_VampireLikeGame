@@ -20,55 +20,132 @@ int main() {
 	swarm s;
 	items itm;
 	string ss = "SavedData/test.dat";
-	//load the game data from test.dat
-	loadGame(ss, s, h, itm);
-	while (running) {
-		canvas.checkInput();
-		canvas.clear();
+	// start a new game or load game
+	int choice;
+	do {
+		cout << "1.Start a new game   2.Load game" << endl;
+		cin >> choice;
+	} while (choice != 1 && choice != 2);
 
-		float dt = tim.dt();
-		elapsedTime += dt;
-		frameCount++;
-		// update FPS each second
-		if (elapsedTime >= 1.0f) {
-			float fps = frameCount / elapsedTime;
-			frameCount = 0;
-			elapsedTime = 0.0f;
-
-			std::cout << " FPS: " << fps << "  Score: " << score << std::endl;
+	if (choice == 2) {
+		if (!fileExists(ss)) {
+			do {
+				cout << "There's no saved data." << endl;
+				do {
+					cout << "1.Start new game   2.Load game" << endl;
+					cin >> choice;
+				} while (choice != 1 && choice != 2);
+			} while (choice != 1);
+			level = getLevel();
 		}
+		else loadGame(ss, s, h, itm);
+	}
+	else if (choice == 1) level = getLevel();
+	int wx = 0, wy = 0;
+	if (level == 1) {
+		while (running) {
+			canvas.checkInput();
+			canvas.clear();
 
-		int x = 0, y = 0;
-		int move = static_cast<int>((400.f * dt));
-		// update game logic
-		if (canvas.keyPressed(VK_ESCAPE)) break;
-		if (canvas.keyPressed('W')) y -= move;
-		if (canvas.keyPressed('S')) y += move;
-		if (canvas.keyPressed('A')) x -= move;
-		if (canvas.keyPressed('D')) x += move;
-		if (canvas.keyPressed('C')) {
-			if (!saveTriggered) {
-				saveGame(ss, s, h, itm);// save the game data
-				std::cout << "Save success" << std::endl;
-				saveTriggered = true;
+			float dt = tim.dt();
+			elapsedTime += dt;
+			frameCount++;
+			// update FPS each second
+			if (elapsedTime >= 1.0f) {
+				float fps = frameCount / elapsedTime;
+				frameCount = 0;
+				elapsedTime = 0.0f;
+
+				std::cout << " FPS: " << fps << "  Score: " << score << std::endl;
+			}
+
+			int x = 0, y = 0;
+			int move = static_cast<int>((400.f * dt));
+			// update game logic
+			if (canvas.keyPressed(VK_ESCAPE)) break;
+			if (canvas.keyPressed('W')) y -= move;
+			if (canvas.keyPressed('S')) y += move;
+			if (canvas.keyPressed('A')) x -= move;
+			if (canvas.keyPressed('D')) x += move;
+			if (canvas.keyPressed('C')) {
+				if (!saveTriggered) {
+					saveGame(ss, s, h, itm);// save the game data
+					std::cout << "Save success" << std::endl;
+					saveTriggered = true;
+				}
+			}
+			else saveTriggered = false;
+
+			wx -= x; wy -= y;
+			w.draw(canvas, cm);
+			w.update(h, x, y, w.getMapWidth(), w.getMapHeight(), cm);
+
+			s.update(canvas, dt, h, w.getMapWidth(), w.getMapHeight());
+			h.hUpdate(canvas, x, y, dt, s, w.getMapWidth(), w.getMapHeight(), cm);
+			itm.update(canvas, dt, h);
+
+			itm.draw(canvas, cm);
+			s.draw(canvas, cm);
+			h.draw(canvas, cm);
+
+			canvas.present();
+			if (!running) {
+				remove("SavedData/test.dat");
+				break; // if game is over, quit the exe and remove the save data
 			}
 		}
-		else saveTriggered = false;
+	}
+	else if (level == 2) {
+		while (running) {
+			canvas.checkInput();
+			canvas.clear();
 
-		w.draw(canvas, cm);
-		w.update(h, x, y, w.getMapWidth(), w.getMapHeight(), cm);
-		s.update(canvas, dt, h, w.getMapWidth(), w.getMapHeight());
-		h.hUpdate(canvas, x, y, dt, s, w.getMapWidth(), w.getMapHeight(), cm);
-		itm.update(canvas, dt, h);
+			float dt = tim.dt();
+			elapsedTime += dt;
+			frameCount++;
+			// update FPS each second
+			if (elapsedTime >= 1.0f) {
+				float fps = frameCount / elapsedTime;
+				frameCount = 0;
+				elapsedTime = 0.0f;
 
-		itm.draw(canvas, cm);
-		s.draw(canvas, cm);
-		h.draw(canvas, cm);
+				std::cout << " FPS: " << fps << "  Score: " << score << std::endl;
+			}
 
-		canvas.present();
-		if (!running) {
-			remove("SavedData/test.dat");
-			break; // (待添加，弹出游戏结束的提示窗口)
+			int x = 0, y = 0;
+			int move = static_cast<int>((400.f * dt));
+			// update game logic
+			if (canvas.keyPressed(VK_ESCAPE)) break;
+			if (canvas.keyPressed('W')) y -= move;
+			if (canvas.keyPressed('S')) y += move;
+			if (canvas.keyPressed('A')) x -= move;
+			if (canvas.keyPressed('D')) x += move;
+			if (canvas.keyPressed('C')) {
+				if (!saveTriggered) {
+					saveGame(ss, s, h, itm);// save the game data
+					std::cout << "Save success" << std::endl;
+					saveTriggered = true;
+				}
+			}
+			else saveTriggered = false;
+
+			wx -= x; wy -= y;
+			w.draw(canvas, cm, wx, wy);
+			/*w.update(h, x, y, w.getMapWidth(), w.getMapHeight(), cm);*/
+
+			s.update(canvas, dt, h, w.getMapWidth(), w.getMapHeight());
+			h.hUpdate(canvas, x, y, dt, s, w.getMapWidth(), w.getMapHeight(), cm);
+			itm.update(canvas, dt, h);
+
+			itm.draw(canvas, cm);
+			s.draw(canvas, cm);
+			h.draw(canvas, cm);
+
+			canvas.present();
+			if (!running) {
+				remove("SavedData/test.dat");
+				break; // if game is over, quit the exe and remove the save data
+			}
 		}
 	}
 }

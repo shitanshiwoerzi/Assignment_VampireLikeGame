@@ -85,6 +85,7 @@ void world::update(LogicBase::hero& h, float x, float y, float mapWidth, float m
 	if (!collisionYDetected) h.update(0, y, mapWidth, mapHeight, cm);
 }
 
+// draw fixed map
 void world::draw(GamesEngineeringBase::Window& canvas, Camera& cm) {
 	for (int i = 0; i < tileshigh; i++) {
 		if (i >= 0 && i < tileshigh) {
@@ -94,6 +95,43 @@ void world::draw(GamesEngineeringBase::Window& canvas, Camera& cm) {
 					tiles[i][j].x = tilewidth * j;
 					tiles[i][j].y = tileheight * i;
 				}
+			}
+		}
+	}
+}
+
+// draw infinite map
+void world::draw(GamesEngineeringBase::Window& canvas, Camera& cm, int wx, int wy) {
+	int r = wy % getMapHeight();
+	int n = wx % getMapWidth();
+
+	// get the offsets
+	int xOffsets[3] = { -getMapWidth(), 0, getMapWidth() };
+	int yOffsets[3] = { -getMapHeight(), 0, getMapHeight() };
+
+	// get the hero's view range
+	int viewportLeft = cm.m_Position.x - canvas.getWidth();
+	int viewportRight = cm.m_Position.x + canvas.getWidth();
+	int viewportTop = cm.m_Position.y - canvas.getHeight();
+	int viewportBottom = cm.m_Position.y + canvas.getHeight();
+
+	for (int yOffset : yOffsets) {
+		for (int xOffset : xOffsets) {
+			drawTiles(canvas, cm, n, r, xOffset, yOffset, viewportLeft, viewportRight, viewportTop, viewportBottom);
+		}
+	}
+}
+
+void world::drawTiles(GamesEngineeringBase::Window& canvas, Camera& cm, int n, int r, int xOffset, int yOffset,
+	int viewportLeft, int viewportRight, int viewportTop, int viewportBottom) {
+	for (int i = 0; i < tileshigh; ++i) {
+		for (int j = 0; j < tileswide; ++j) {
+			int tileX = tilewidth * j + n + xOffset;
+			int tileY = tileheight * i + r + yOffset;
+			if (tileX + tilewidth > viewportLeft && tileX < viewportRight && tileY + tileheight > viewportTop && tileY < viewportBottom) {
+				tiles[i][j].draw(canvas, tileX, tileY, cm);
+				tiles[i][j].x = tileX;
+				tiles[i][j].y = tileY;
 			}
 		}
 	}

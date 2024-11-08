@@ -2,10 +2,25 @@
 
 bool running = true;
 bool aoeTriggered = false; // status of AOE trigger key 'J' 
-float heroProjectileSpeed = 100.f; 
+float heroProjectileSpeed = 100.f;
 int aoeNumber = 5;
 float score = 0.f;
 bool saveTriggered = false;
+int level;
+
+bool fileExists(std::string filename) {
+	std::ifstream infile(filename, std::ios::binary);
+	if (infile.is_open()) return true;
+	return false;
+}
+
+int getLevel() {
+	do {
+		std::cout << "Please choose your level: 1. fixed  2. infinite" << std::endl;
+		std::cin >> level;
+	} while (level != 2 && level != 1);
+	return level;
+}
 
 // vector normalization(to keep the npcs' speed consistent)
 void vecNormalize(Vector2D& vec) {
@@ -17,9 +32,9 @@ void vecNormalize(Vector2D& vec) {
 }
 
 void saveString(std::ofstream& binout, const std::string& str) {
-    size_t length = str.size();
-    binout.write((char*)&length, sizeof(length)); // write string length
-    binout.write(str.c_str(), length); // write the contents of the string
+	size_t length = str.size();
+	binout.write((char*)&length, sizeof(length)); // write string length
+	binout.write(str.c_str(), length); // write the contents of the string
 }
 
 std::string loadString(std::ifstream& infile) {
