@@ -21,7 +21,7 @@ int main() {
 	items itm;
 	string ss = "SavedData/test.dat";
 	//load the game data from test.dat
-	LoadGame(ss, s, h, itm);
+	loadGame(ss, s, h, itm);
 	while (running) {
 		canvas.checkInput();
 		canvas.clear();
@@ -29,26 +29,29 @@ int main() {
 		float dt = tim.dt();
 		elapsedTime += dt;
 		frameCount++;
-		// 每秒更新一次 FPS
+		// update FPS each second
 		if (elapsedTime >= 1.0f) {
 			float fps = frameCount / elapsedTime;
 			frameCount = 0;
 			elapsedTime = 0.0f;
 
-			// 输出FPS
-			std::cout << " FPS: " << fps << std::endl;
+			std::cout << " FPS: " << fps << "  Score: " << score << std::endl;
 		}
 
 		int x = 0, y = 0;
-		int move = static_cast<int>((500.f * dt));
-		// Update game logic
+		int move = static_cast<int>((400.f * dt));
+		// update game logic
 		if (canvas.keyPressed(VK_ESCAPE)) break;
 		if (canvas.keyPressed('W')) y -= move;
 		if (canvas.keyPressed('S')) y += move;
 		if (canvas.keyPressed('A')) x -= move;
 		if (canvas.keyPressed('D')) x += move;
-		w.draw(canvas, cm);
+		if (canvas.keyPressed('C')) {
+			if (saveGame(ss, s, h, itm))// save the game data
+				std::cout << "Save success" << std::endl;
+		}
 
+		w.draw(canvas, cm);
 		w.update(h, x, y, w.getMapWidth(), w.getMapHeight(), cm);
 		s.update(canvas, dt, h, w.getMapWidth(), w.getMapHeight());
 		h.hUpdate(canvas, x, y, dt, s, w.getMapWidth(), w.getMapHeight(), cm);
@@ -59,10 +62,9 @@ int main() {
 		h.draw(canvas, cm);
 
 		canvas.present();
-		if (!running)
+		if (!running) {
+			remove("SavedData/test.dat");
 			break; // (待添加，弹出游戏结束的提示窗口)
+		}
 	}
-
-	// save the game data
-	SaveGame(ss, s, h, itm);
 }

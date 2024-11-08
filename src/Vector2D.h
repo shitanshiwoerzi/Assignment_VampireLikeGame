@@ -10,7 +10,6 @@ public:
 
 	Vector2D(float _x, float _y);
 
-	// 返回两点之间的距离
 	float distance(Vector2D pos);
 
 	Vector2D operator+(Vector2D const& vec); 

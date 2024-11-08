@@ -10,7 +10,7 @@ Vector2D::Vector2D(float _x, float _y) {
 	y = _y;
 }
 
-// 返回两点之间的距离
+// return the distance between two points
 float Vector2D::distance(Vector2D pos) {
 	return sqrtf(pow(x - pos.x, 2) + pow(y - pos.y, 2));
 }

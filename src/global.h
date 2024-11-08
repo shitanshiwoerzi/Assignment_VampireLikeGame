@@ -12,6 +12,7 @@ extern bool aoeTriggered;
 extern float heroProjectileSpeed;
 extern float npcProjectileSpeed;
 extern int aoeNumber;
+extern float score;
 
 struct Effect {
     Vector2D position;

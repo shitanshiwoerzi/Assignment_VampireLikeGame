@@ -17,6 +17,9 @@ using namespace std;
 namespace LogicBase {
 	const int maxSiz = 10000;
 
+	/// <summary>
+	/// base class of hero and npc
+	/// </summary>
 	class Character {
 	protected:
 		Health* hp;
@@ -102,7 +105,6 @@ namespace LogicBase {
 		Vector2D pos;
 		float speed = 15.f;
 
-
 		Projectile(string filename) { sprite.load(filename); }
 
 		Projectile(Vector2D _pos, Vector2D _vel, string filename) {
@@ -187,7 +189,7 @@ namespace LogicBase {
 			}
 		}
 
-		// 删除子弹
+		// delete bullets
 		void deleteProjectile(int i) {
 			Projectile* p = parray[i];
 			parray[i] = nullptr;
@@ -195,10 +197,10 @@ namespace LogicBase {
 		}
 
 		void update(float mapWidth, float mapHeight, Character& h, float dt) {
-			// 定时生成子弹
+			// scheduled bullets generation
 			generateProjectile(h, dt);
 
-			// 子弹移动
+			// bullet movement
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr) {
 					parray[i]->update(parray[i]->speed, dt);
@@ -212,7 +214,6 @@ namespace LogicBase {
 			}
 		}
 
-		// 渲染
 		void draw(Window& canvas, Camera& cm) override {
 			// draw the npc
 			renderImg(canvas, sprite, pos, cm);
@@ -300,6 +301,9 @@ namespace LogicBase {
 		}
 	};
 
+	/// <summary>
+	/// collection of all NPCs
+	/// </summary>
 	class swarm {
 		float timeElapsed = 0.f;
 		float timeThreshold = 3.f;
@@ -314,14 +318,14 @@ namespace LogicBase {
 			}
 		}
 
-		// 删除Npc
+		// delete npc
 		void deleteNpc(Window& canvas, int i) {
 			Character* p = sarray[i];
 			sarray[i] = nullptr;
 			delete p;
 		}
 
-		// npc逻辑更新
+		// npc logic
 		void update(Window& canvas, float dt, Character& h, float mapWidth, float mapHeight) {
 			int npcType = rand() % 4;
 			generateNpc(mapWidth, mapHeight, dt, npcType);
@@ -333,13 +337,11 @@ namespace LogicBase {
 					}
 					else
 						sarray[i]->update(canvas, h, dt);
-					// 待修改(npc跑到地图外后删除的条件需完善)
 				}
 			}
 			checkCollision(canvas, h, dt);
 		}
 
-		// 绘制在canvas上
 		void draw(Window& canvas, Camera& cm) {
 			for (int i = 0; i < currentSize; i++) {
 				if (sarray[i] != nullptr)
@@ -368,11 +370,12 @@ namespace LogicBase {
 				infile.read((char*)&exists, sizeof(exists));
 				if (exists) {
 					if (sarray[i] == nullptr) {
-						string filename = loadString(infile); // 读取文件路径
+						// read file path
+						string filename = loadString(infile);
 						if (filename == "Resources/wizard.png")
 							sarray[i] = new npc3(0, 0, filename);
 						else
-							sarray[i] = new Character(0, 0, filename); // 使用文件路径创建对象
+							sarray[i] = new Character(0, 0, filename);
 					}
 
 					sarray[i]->load(infile);
@@ -387,7 +390,7 @@ namespace LogicBase {
 		}
 
 	private:
-		// 定时生成npc
+		// npc scheduled generation
 		void generateNpc(float mapWidth, float mapHeight, float dt, int npcType) {
 			timeElapsed += dt;
 			if (timeElapsed > timeThreshold) {
@@ -418,7 +421,7 @@ namespace LogicBase {
 			}
 		}
 
-		// 生成的npc与hero的碰撞检测, 即npc的攻击碰撞检测(无projectile)
+		// generated collision detection between npc and hero, i.e. attack collision detection for npc (no projectile)
 		void checkCollision(Window& canvas, Character& h, float dt) {
 			for (int i = 0; i < currentSize; i++) {
 				if (sarray[i] != nullptr) {
@@ -441,7 +444,7 @@ namespace LogicBase {
 					if (sarray[i]->collide(h)) {
 						timeElapsed += dt;
 						if (timeElapsed > 1.f) {
-							// 定时检测碰撞, 防止过多的碰撞判定
+							// timed collision detection to prevent excessive collision decisions
 							h.getHealth().takeDamage(20);
 							cout << "npc touched the hero " << i << endl;
 							cout << "hero was attacked";
@@ -459,12 +462,15 @@ namespace LogicBase {
 		}
 	};
 
+	/// <summary>
+	/// main character
+	/// </summary>
 	class hero : public Character {
 		float timeElapsed = 0;
 		float aoeTimeElapsed = 0;
 		int currentFrame;
 		float frameTime;
-		float aoeCooldownDuration = 1.0f;
+		float aoeCooldownDuration = 10.0f;
 		Image heroFrames[4];
 		Image lightning;
 	public:
@@ -485,13 +491,14 @@ namespace LogicBase {
 			}
 		}
 
+		// hero logic
 		void hUpdate(Window& canvas, float _x, float _y, float dt, swarm& s, float mapWidth, float mapHeight, Camera& cm) {
 			updateFrame(dt);
 			generateProjectile(*this, dt, s);
 			checkCollision(canvas, s, dt, cm);
 			updateEffects(canvas, cm, dt);
 
-			// 子弹移动
+			// bullet movement
 			for (int i = 0; i < currentSize; i++) {
 				if (parray[i] != nullptr) {
 					parray[i]->update(heroProjectileSpeed, dt);
@@ -560,8 +567,8 @@ namespace LogicBase {
 		}
 
 	private:
+		// update animation frames
 		void updateFrame(float dt) {
-			// 更新动画帧
 			frameTime += dt;
 			if (frameTime >= 0.5f) {
 				currentFrame = (currentFrame + 1) % 4;
@@ -569,7 +576,7 @@ namespace LogicBase {
 			}
 		}
 
-		// 用于更新AOE渲染(防止渲染逻辑在每一帧都被重置)
+		// Used to update the AOE rendering (prevents the rendering logic from being reset at every frame)
 		void updateEffects(Window& canvas, Camera& cm, float dt) {
 			for (auto it = activeEffects.begin(); it != activeEffects.end(); ) {
 				it->elapsedTime += dt;
@@ -599,7 +606,7 @@ namespace LogicBase {
 			return closestIndex;
 		}
 
-		// hero的攻击碰撞检测
+		// attack collision detection for hero
 		void checkCollision(Window& canvas, swarm& s, float dt, Camera& cm) {
 			// linear attack 
 			for (int i = 0; i < currentSize; i++) {
@@ -608,20 +615,21 @@ namespace LogicBase {
 						if (parray[i]->collide(*s.sarray[j])) {
 							deleteProjectile(i);
 							s.sarray[j]->getHealth().takeDamage(50.f);
-							if (s.sarray[j]->getHealth().isDead())
+							if (s.sarray[j]->getHealth().isDead()) {
 								s.deleteNpc(canvas, j);
+								score += 10;
+							}
 						}
-
 					}
 				}
 			}
 
-			// aoe attack, aoeTriggered的作用是让技能仅触发一次
+			// aoe attack, the effect of 'aoeTriggered' is to make the skill trigger only once
 			aoeTimeElapsed += dt;
 			if (canvas.keyPressed('J') && aoeTimeElapsed >= aoeCooldownDuration) {
 				if (!aoeTriggered) {
 					cout << "Use Aoe skill" << endl;
-					triggerAOE(canvas, s, aoeNumber, cm, dt); // the number should not be fixed
+					triggerAOE(canvas, s, aoeNumber, cm, dt);
 					aoeTriggered = true;
 					aoeTimeElapsed = 0;
 				}
@@ -653,12 +661,12 @@ namespace LogicBase {
 			}
 		}
 
-		// 选择生命值最高的前N个NPC并对其进行攻击
+		// Select the top N NPCs with the highest life values and attack them.
 		void triggerAOE(Window& canvas, swarm& s, int N, Camera& cm, float dt) {
 			for (int n = 0; n < N; n++) {
 				int maxIndex = -1;
 				float maxHealth = -100.f;
-				// 找到当前最大生命值的NPC
+				// find the NPC with the current maximum life
 				for (int i = 0; i < s.currentSize; i++) {
 					if (s.sarray[i] != nullptr) {
 						float hp = s.sarray[i]->getHealth().getHp();
@@ -671,25 +679,25 @@ namespace LogicBase {
 
 				if (maxIndex != -1) {
 					Character* npc = s.sarray[maxIndex];
-					// 对该NPC进行攻击
 					cout << "Attacking NPC" << typeid(*s.sarray[maxIndex]).name()
 						<< "with health : " << npc->getHealth().getHp() << endl;
 
-					// 实现aoe的视觉效果
+					// realizing the visual effects of aoe
 					Vector2D actualPos = Vector2D(npc->pos.x + npc->sprite.width - lightning.width / 2, npc->pos.y + npc->sprite.height - lightning.height);
 					//renderImg(canvas, lightning, actualPos, cm);
 					activeEffects.push_back({ actualPos, 0.2f, 0.0f });
 
-
-					// 假设攻击减少50点生命值
+					// assuming the attack reduces life points by 200
 					npc->getHealth().takeDamage(200);
-					if (npc->getHealth().isDead())
+					if (npc->getHealth().isDead()) {
 						s.deleteNpc(canvas, maxIndex);
+						score += 10;
+					}
 				}
 			}
 		}
 
-		// 删除子弹
+		// delete bullets
 		void deleteProjectile(int i) {
 			Projectile* p = parray[i];
 			parray[i] = nullptr;
@@ -697,6 +705,9 @@ namespace LogicBase {
 		}
 	};
 
+	/// <summary>
+	/// collection of all powerups
+	/// </summary>
 	class items {
 		float timeElapsed = 0.f;
 		float timeThreshold = 10.f;
@@ -721,6 +732,7 @@ namespace LogicBase {
 					heroProjectileSpeed = min(heroProjectileSpeed, 200.f);
 					h.projectileInterval = max(0.1f, h.projectileInterval);
 					aoeNumber += 1;
+					cout << "Power Up!!!" << endl;
 					deleteItem(i);
 				}
 			}

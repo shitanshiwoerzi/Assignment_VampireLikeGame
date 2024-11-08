@@ -4,8 +4,9 @@ bool running = true;
 bool aoeTriggered = false; // status of AOE trigger key 'J' 
 float heroProjectileSpeed = 100.f; 
 int aoeNumber = 5;
+float score = 0.f;
 
-// vector normalization
+// vector normalization(to keep the npcs' speed consistent)
 void vecNormalize(Vector2D& vec) {
 	float length = std::sqrtf(std::pow(vec.x, 2) + std::pow(vec.y, 2));
 	if (length != 0) {
@@ -16,20 +17,20 @@ void vecNormalize(Vector2D& vec) {
 
 void saveString(std::ofstream& binout, const std::string& str) {
     size_t length = str.size();
-    binout.write((char*)&length, sizeof(length)); // 写入字符串长度
-    binout.write(str.c_str(), length); // 写入字符串内容
+    binout.write((char*)&length, sizeof(length)); // write string length
+    binout.write(str.c_str(), length); // write the contents of the string
 }
 
 std::string loadString(std::ifstream& infile) {
 	size_t length;
-	infile.read((char*)&length, sizeof(length)); // 读取字符串长度
+	infile.read((char*)&length, sizeof(length)); // read string length
 	if (!infile || length >= 99999) {
 		std::cerr << "Error reading length from file." << std::endl;
 		return "";
 	}
 	char* buffer = new char[length + 1];
-	infile.read(buffer, length); // 读取字符串内容
-	buffer[length] = '\0'; // 添加字符串结束符
+	infile.read(buffer, length); // read the contents of the string
+	buffer[length] = '\0'; 	// add string terminator
 	std::string str(buffer);
 	delete[] buffer;
 	return str;
@@ -51,7 +52,7 @@ void renderImg(GamesEngineeringBase::Window& canvas, GamesEngineeringBase::Image
 	}
 }
 
-// 图片像素级碰撞检测
+// image pixel-level collision detection
 bool checkImageCollision(GamesEngineeringBase::Image& img1, unsigned int x1, unsigned int y1, GamesEngineeringBase::Image& img2, unsigned int x2, unsigned int y2)
 {
 	// 计算图片的重叠区域
