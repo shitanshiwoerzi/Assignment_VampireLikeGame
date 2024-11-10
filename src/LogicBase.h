@@ -733,7 +733,7 @@ namespace LogicBase {
 		void update(Window& canvas, float dt, hero& h) {
 			generateItem(canvas, dt);
 			for (int i = 0; i < currentSize; i++) {
-				// 碰撞到增强道具并获得增强效果
+				// collide with enhancement props and get enhancement effects
 				if (upItems[i]->collide(h)) {
 					heroProjectileSpeed += 10.f;
 					h.projectileInterval -= 0.2f;
